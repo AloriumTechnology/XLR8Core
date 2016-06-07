@@ -1,0 +1,149 @@
+# Copyright (c) 2016 Alorim Technology.  All right reserved.
+#
+# Quartus settings for XLR8 project
+#  http://www.aloriumtech.com/xlr8
+#  https://github.com/AloriumTechnology
+#
+# This isn't the complete list of all settings needed for the
+#  xlr8 project, it is just the settings that are common for
+#  most/all configurations. This file should be sourced by a
+#  higher level qsf file that has the rest of the settings needed
+
+set_global_assignment -name FAMILY "MAX 10"
+set_global_assignment -name DEVICE 10M08SAU169C8G
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION 15.1.0
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:28:50  JANUARY 16, 2016"
+set_global_assignment -name LAST_QUARTUS_VERSION 15.1.0
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name DEVICE_FILTER_PIN_COUNT 169
+set_global_assignment -name ERROR_CHECK_FREQUENCY_DIVISOR 2
+set_global_assignment -name EDA_SIMULATION_TOOL "ModelSim-Altera (Verilog)"
+set_global_assignment -name EDA_TIME_SCALE "1 ps" -section_id eda_simulation
+set_global_assignment -name EDA_OUTPUT_DATA_FORMAT "VERILOG HDL" -section_id eda_simulation
+set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "3.3-V LVTTL"
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_global_assignment -name VCCA_USER_VOLTAGE 3.3V
+set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
+set_global_assignment -name VERILOG_SHOW_LMF_MAPPING_MESSAGES OFF
+set_global_assignment -name ENABLE_OCT_DONE OFF
+set_global_assignment -name USE_CONFIGURATION_DEVICE OFF
+set_global_assignment -name INTERNAL_FLASH_UPDATE_MODE "DUAL IMAGES"
+set_global_assignment -name CRC_ERROR_OPEN_DRAIN OFF
+set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -rise
+set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -fall
+set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -rise
+set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -fall
+set_location_assignment PIN_A4 -to A5
+set_location_assignment PIN_B3 -to A4
+set_location_assignment PIN_B6 -to A3
+set_location_assignment PIN_A7 -to A2
+set_location_assignment PIN_A8 -to A1
+set_location_assignment PIN_A10 -to A0
+set_location_assignment PIN_A3 -to DIG_IO_OE[5]
+set_location_assignment PIN_B4 -to DIG_IO_OE[4]
+set_location_assignment PIN_B5 -to DIG_IO_OE[3]
+set_location_assignment PIN_A6 -to DIG_IO_OE[2]
+set_location_assignment PIN_A9 -to DIG_IO_OE[1]
+set_location_assignment PIN_A11 -to DIG_IO_OE[0]
+set_location_assignment PIN_H6 -to Clock
+set_location_assignment PIN_M11 -to D13
+set_location_assignment PIN_L11 -to D12
+set_location_assignment PIN_N10 -to D11
+set_location_assignment PIN_N9 -to D10
+set_location_assignment PIN_M9 -to D9
+set_location_assignment PIN_M8 -to D8
+set_location_assignment PIN_N7 -to D7
+set_location_assignment PIN_N8 -to D6
+set_location_assignment PIN_M7 -to D5
+set_location_assignment PIN_N6 -to D4
+set_location_assignment PIN_N5 -to D3
+set_location_assignment PIN_N4 -to D2
+set_location_assignment PIN_M5 -to TX
+set_location_assignment PIN_M4 -to RX
+set_location_assignment PIN_K10 -to PIN13LED
+set_location_assignment PIN_B9 -to RESET_N
+set_location_assignment PIN_B11 -to ANA_UP
+set_location_assignment PIN_M10 -to I2C_ENABLE
+set_location_assignment PIN_M13 -to SCL
+set_location_assignment PIN_M12 -to SDA
+set_global_assignment -name ENABLE_JTAG_PIN_SHARING ON
+#set_location_assignment PIN_E5 -to JTAGEN
+set_location_assignment PIN_F5  -to JT9
+set_location_assignment PIN_L5 -to JT7
+set_location_assignment PIN_L4 -to JT6
+set_location_assignment PIN_G1  -to JT5
+set_location_assignment PIN_F6  -to JT3
+set_location_assignment PIN_G2  -to JT1
+set_location_assignment PIN_D11 -to SOIC7
+set_location_assignment PIN_D12 -to SOIC6
+set_location_assignment PIN_E13 -to SOIC5
+set_location_assignment PIN_C11 -to SOIC3
+set_location_assignment PIN_B13 -to SOIC2
+set_location_assignment PIN_C12 -to SOIC1
+
+set_global_assignment -name POWER_USE_PVA OFF
+
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
+#set_global_assignment -name OPTIMIZATION_MODE "AGGRESSIVE AREA"
+#set_global_assignment -name EDA_SIMULATION_TOOL VCS
+#set_global_assignment -name EDA_SIMULATION_TOOL "<None>"
+set_global_assignment -name EDA_OUTPUT_DATA_FORMAT "VERILOG HDL" -section_id eda_simulation
+set_global_assignment -name EDA_TIME_SCALE "1 ps" -section_id eda_simulation
+set_global_assignment -name EDA_OUTPUT_DATA_FORMAT "VERILOG HDL" -section_id eda_simulation
+set_global_assignment -name EDA_MAINTAIN_DESIGN_HIERARCHY ON -section_id eda_simulation
+#set_global_assignment -name FLOW_ENABLE_POWER_ANALYZER ON
+set_global_assignment -name POWER_DEFAULT_TOGGLE_RATE "12.5 %"
+set_global_assignment -name POWER_DEFAULT_INPUT_IO_TOGGLE_RATE "12.5 %"
+
+# May want weak pullups since we don't have them on the board
+#set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to A5
+#set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to A4
+#set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to A3
+#set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to A2
+#set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to A1
+#set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to A0
+
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to portc_pads[5]
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to portc_pads[4]
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to portc_pads[3]
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to portc_pads[2]
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to portc_pads[1]
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to portc_pads[0]
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to portb_pads[5]
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to portb_pads[4]
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to portb_pads[3]
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to portb_pads[2]
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to portb_pads[1]
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to portb_pads[0]
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to portd_pads[7]
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to portd_pads[6]
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to portd_pads[5]
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to portd_pads[4]
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to portd_pads[3]
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to portd_pads[2]
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to portd_pads[1]
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to portd_pads[0]
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to SCL
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to SDA
+#set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to JTAGEN
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to JT9
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to JT7
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to JT6
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to JT5
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to JT3
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to JT1
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to SOIC7
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to SOIC6
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to SOIC5
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to SOIC3
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to SOIC2
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to SOIC1
+set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to RESET_N
+
+set_global_assignment -name SOURCE_TCL_SCRIPT_FILE ../../../XLR8Core/extras/quartus/xlr8_top_core.tcl
+# End of xlr8_top_core.qsf
