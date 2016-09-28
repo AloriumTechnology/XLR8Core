@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simPackage>
+ <file
+   path="simulation/submodules/altera_int_osc.v"
+   type="VERILOG"
+   library="int_osc_0" />
+ <file
+   path="simulation/submodules/altera_int_osc.sdc"
+   type="SDC"
+   library="int_osc_0" />
+ <file path="simulation/int_osc.v" type="VERILOG" />
+ <topLevel name="int_osc" />
+ <deviceFamily name="max10" />
+</simPackage>
