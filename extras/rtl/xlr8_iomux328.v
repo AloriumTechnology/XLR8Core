@@ -39,7 +39,8 @@ module xlr8_iomux328
     input [19:0]  xb_ddoe, // override data direction
     input [19:0]  xb_ddov, // data direction value if overridden (1=output)
     input [19:0]  xb_pvoe, // override output value
-    input [19:0]  xb_pvov, // output value if overridden
+    input [19:0]  xb_pvov, // override value if overrriden
+    output [19:0]  xb_pinx, // data from pad to xb
     // Pin change interrupts
     input [23:0]  pcint_irq, // pcint mask
     input         pcie0, // pc int enable
@@ -221,6 +222,8 @@ module xlr8_iomux328
    assign ICP1_pin = portb_pinx[0];
    assign PIN13LED = portb_pads[5];
 
+   assign xb_pinx[13:8] = portb_pads[5:0]; //XXX - may want ie override and value
+
 // Port C, table 14-7 and 14-8
    assign portc_puoe[5] = twen;
    assign portc_puov[5] = portc_portx[5] && ~PUD;
@@ -269,6 +272,9 @@ module xlr8_iomux328
    assign portc_pads[1] = portc_oe[1] ? portc_dout[1] : 1'bZ;
    assign portc_pads[0] = portc_oe[0] ? portc_dout[0] : 1'bZ;
    assign portc_pinx[5:0] = portc_pads & portc_ie;
+
+   assign xb_pinx[19:14] = portc_pads[5:0]; //XXX - may want ie override and value
+
    // Arduino has SDA/SCL tied to A4/A5, so I2C could be used in either
    //  (or both) locations. We've dropped I2C support on the A4/A5 pins
    //  so that A4/A5 can be used as inputs (either analog or digital)
@@ -343,6 +349,9 @@ module xlr8_iomux328
    assign portd_pads[1] = portd_oe[1] ? portd_dout[1] : 1'bZ;
    assign portd_pads[0] = portd_oe[0] ? portd_dout[0] : 1'bZ;
    assign portd_pinx[7:0] = portd_pads & portd_ie;
+
+   assign xb_pinx[7:0] = portd_pads[7:0]; //XXX - may want ie override and value
+
    assign T1_pin = portd_pinx[5];
    assign xck_rcv = portd_pinx[4];
    assign T0_pin = portd_pinx[4];
