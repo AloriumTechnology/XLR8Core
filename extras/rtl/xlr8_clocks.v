@@ -6,7 +6,7 @@
 //=================================================================
 //
 // File name:  : xlr8_clocks.v
-// Author      : Matt Weber  linkedin.com/in/mattweberdesign
+// Author      : Matt Weber  support@aloriumtech.com
 // Contact     :  info@aloriumtech.com
 // Description : GPIO registers as well as version registers
 //

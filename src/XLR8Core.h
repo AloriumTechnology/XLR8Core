@@ -5,7 +5,7 @@
    isn't any C/C++ code associated with this library but
    this empty header file prevents the Arduino IDE from 
    calling it an invalid library
- Written by Matt Weber (linkedin.com/in/mattweberdesign) of
+ Written by Matt Weber (support@aloriumtech.com) of
  Alorium Technology (info@aloriumtech.com)
 
  
