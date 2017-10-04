@@ -1,0 +1,19 @@
+# system info int_osc on 2016.01.14.23:05:28
+system_info:
+name,value
+DEVICE,10M08SAU169C8G
+DEVICE_FAMILY,MAX 10
+GENERATION_ID,1452834328
+#
+#
+# Files generated for int_osc on 2016.01.14.23:05:28
+files:
+filepath,kind,attributes,module,is_top
+simulation/int_osc.v,VERILOG,,int_osc,true
+simulation/submodules/altera_int_osc.v,VERILOG,,altera_int_osc,false
+simulation/submodules/altera_int_osc.sdc,SDC,,altera_int_osc,false
+#
+# Map from instance-path to kind of module
+instances:
+instancePath,module
+int_osc.int_osc_0,altera_int_osc
