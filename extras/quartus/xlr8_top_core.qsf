@@ -146,4 +146,8 @@ set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to SOIC1
 set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to RESET_N
 
 set_global_assignment -name SOURCE_TCL_SCRIPT_FILE ../../../XLR8Core/extras/quartus/xlr8_top_core.tcl
+
+# Set value for number of pins on board.  Use XLR8 = 20, Sno = 38, Hinj = 122
+set_parameter -name NUM_PINS 20
+
 # End of xlr8_top_core.qsf

@@ -1,12 +1,12 @@
-# system info int_osc on 2016.01.14.23:05:28
+# system info int_osc on 2018.02.25.18:49:05
 system_info:
 name,value
 DEVICE,10M08SAU169C8G
 DEVICE_FAMILY,MAX 10
-GENERATION_ID,1452834328
+GENERATION_ID,1519606145
 #
 #
-# Files generated for int_osc on 2016.01.14.23:05:28
+# Files generated for int_osc on 2018.02.25.18:49:05
 files:
 filepath,kind,attributes,module,is_top
 simulation/int_osc.v,VERILOG,,int_osc,true
