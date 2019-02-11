@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Alorim Technology.  All right reserved.
+# Copyright (c) 2016 Alorium Technology.  All right reserved.
 #
 # Quartus settings for XLR8 project
 #  http://www.aloriumtech.com/xlr8

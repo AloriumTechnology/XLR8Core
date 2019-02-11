@@ -1,5 +1,5 @@
 
-# (C) 2001-2016 Altera Corporation. All rights reserved.
+# (C) 2001-2018 Altera Corporation. All rights reserved.
 # Your use of Altera Corporation's design tools, logic functions and 
 # other software and tools, and its AMPP partner logic functions, and 
 # any output files any of the foregoing (including device programming 
@@ -12,36 +12,76 @@
 # or its authorized distributors. Please refer to the applicable 
 # agreement for further details.
 
-# ACDS 15.1 185 linux 2016.01.14.23:05:38
+# ACDS 17.1 590 linux 2018.02.21.14:48:31
 
 # ----------------------------------------
 # vcs - auto-generated simulation script
 
 # ----------------------------------------
-# This script can be used to simulate the following IP:
+# This script provides commands to simulate the following IP detected in
+# your Quartus project:
 #     int_osc
-# To create a top-level simulation script which compiles other
-# IP, and manages other system issues, copy the following template
-# and adapt it to your needs:
 # 
-# # Start of template
-# # If the copied and modified template file is "vcs_sim.sh", run it as:
-# #   ./vcs_sim.sh
+# Altera recommends that you source this Quartus-generated IP simulation
+# script from your own customized top-level script, and avoid editing this
+# generated script.
+# 
+# To write a top-level shell script that compiles Altera simulation libraries
+# and the Quartus-generated IP in your project, along with your design and
+# testbench files, follow the guidelines below.
+# 
+# 1) Copy the shell script text from the TOP-LEVEL TEMPLATE section
+# below into a new file, e.g. named "vcs_sim.sh".
+# 
+# 2) Copy the text from the DESIGN FILE LIST & OPTIONS TEMPLATE section into
+# a separate file, e.g. named "filelist.f".
+# 
+# ----------------------------------------
+# # TOP-LEVEL TEMPLATE - BEGIN
 # #
-# # Override the top-level name
-# # specify a command file containing elaboration options 
-# # (system verilog extension, and compile the top-level).
-# # Override the user-defined sim options, so the simulation 
-# # runs forever (until $finish()).
-# source vcs_setup.sh \
-# TOP_LEVEL_NAME=top \
-# USER_DEFINED_ELAB_OPTIONS="'-f ../../../synopsys_vcs.f'" \
-# USER_DEFINED_SIM_OPTIONS=""
+# # TOP_LEVEL_NAME is used in the Quartus-generated IP simulation script to
+# # set the top-level simulation or testbench module/entity name.
+# #
+# # QSYS_SIMDIR is used in the Quartus-generated IP simulation script to
+# # construct paths to the files required to simulate the IP in your Quartus
+# # project. By default, the IP script assumes that you are launching the
+# # simulator from the IP script location. If launching from another
+# # location, set QSYS_SIMDIR to the output directory you specified when you
+# # generated the IP script, relative to the directory from which you launch
+# # the simulator.
+# #
+# # Source the Quartus-generated IP simulation script and do the following:
+# # - Compile the Quartus EDA simulation library and IP simulation files.
+# # - Specify TOP_LEVEL_NAME and QSYS_SIMDIR.
+# # - Compile the design and top-level simulation module/entity using
+# #   information specified in "filelist.f".
+# # - Override the default USER_DEFINED_SIM_OPTIONS. For example, to run
+# #   until $finish(), set to an empty string: USER_DEFINED_SIM_OPTIONS="".
+# # - Run the simulation.
+# #
+# source <script generation output directory>/synopsys/vcs/vcs_setup.sh \
+# TOP_LEVEL_NAME=<simulation top> \
+# QSYS_SIMDIR=<script generation output directory> \
+# USER_DEFINED_ELAB_OPTIONS="\"-f filelist.f\"" \
+# USER_DEFINED_SIM_OPTIONS=<simulation options for your design>
+# #
+# # TOP-LEVEL TEMPLATE - END
+# ----------------------------------------
 # 
-# # helper file: synopsys_vcs.f
+# ----------------------------------------
+# # DESIGN FILE LIST & OPTIONS TEMPLATE - BEGIN
+# #
+# # Compile all design files and testbench files, including the top level.
+# # (These are all the files required for simulation other than the files
+# # compiled by the Quartus-generated IP simulation script)
+# #
 # +systemverilogext+.sv
-# ../../../top.sv
-# # End of template
+# <design and testbench files, compile-time options, elaboration options>
+# #
+# # DESIGN FILE LIST & OPTIONS TEMPLATE - END
+# ----------------------------------------
+# 
+# IP SIMULATION SCRIPT
 # ----------------------------------------
 # If int_osc is one of several IP cores in your
 # Quartus project, you can generate a simulation script
@@ -54,14 +94,13 @@
 # within the Quartus project, and generate a unified
 # script which supports all the Altera IP within the design.
 # ----------------------------------------
-# ACDS 15.1 185 linux 2016.01.14.23:05:38
+# ACDS 17.1 590 linux 2018.02.21.14:48:31
 # ----------------------------------------
 # initialize variables
 TOP_LEVEL_NAME="int_osc"
 QSYS_SIMDIR="./../../"
-QUARTUS_INSTALL_DIR="/cad/tools/altera/15.1/quartus/"
+QUARTUS_INSTALL_DIR="/cad/tools/altera/17.1/quartus/"
 SKIP_FILE_COPY=0
-SKIP_ELAB=0
 SKIP_SIM=0
 USER_DEFINED_ELAB_OPTIONS=""
 USER_DEFINED_SIM_OPTIONS="+vcs+finish+100"
@@ -69,7 +108,7 @@ USER_DEFINED_SIM_OPTIONS="+vcs+finish+100"
 # overwrite variables - DO NOT MODIFY!
 # This block evaluates each command line argument, typically used for 
 # overwriting variables. An example usage:
-#   sh <simulator>_setup.sh SKIP_ELAB=1 SKIP_SIM=1
+#   sh <simulator>_setup.sh SKIP_SIM=1
 for expression in "$@"; do
   eval $expression
   if [ $? -ne 0 ]; then

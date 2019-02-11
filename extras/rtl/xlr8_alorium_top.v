@@ -39,9 +39,10 @@
 
 module xlr8_alorium_top
   #(
-    parameter DESIGN_CONFIG = 8,
+    parameter DESIGN_CONFIG = 520,
     //    {
-    //     25'd0, // [31:14] - reserved
+    //     10'd0, // [31:22] - reserved
+    //     8'h2,  // [21:14] - reserved for DMEM size
     //     8'h8,  // [13:6]  - MAX10 Size,  ex: 0x8 = M08, 0x32 = M50
     //     1'b0,  //   [5]   - ADC_SWIZZLE, 0 = XLR8,            1 = Sno
     //     1'b0,  //   [4]   - PLL Speed,   0 = 16MHz PLL,       1 = 50Mhz PLL
@@ -50,6 +51,9 @@ module xlr8_alorium_top
     //     1'b0   //   [0]   - FPGA Image,  0 = CFM Application, 1 = CFM Factory
     //     },
 
+    // Specify the size of the DMEM
+    parameter DMEM_SIZE       = 2,  // DMem Size, in KB, Valid range is 2 thru 64,
+    
     // for APPLICATION design, each bit [i]  enables XB[i]
     parameter APP_XB0_ENABLE  = 0, // Should be zero to match Core QXP 
 
@@ -100,12 +104,14 @@ module xlr8_alorium_top
     inout       SOIC1,  // A0 in the case of an 24AA128SM EEPROM
     // JTAG connector reused as digial IO. On that connector, pin 4 is power, pins 2&10 are ground
     //   and pin 8 selects between gpio (low) and jtag (high) modes and has a pulldown.
+
     inout       JT9, // external pullup. JTAG function is TDI
     inout       JT7, // no JTAG function
     inout       JT6, // no JTAG function
     inout       JT5, // external pullup. JTAG function is TMS
     inout       JT3, // JTAG function TDO
     inout       JT1, // external pulldown, JTAG function is TCK
+
     //Clock and Reset
     input       Clock, // 16MHz
     input       RESET_N
@@ -114,7 +120,7 @@ module xlr8_alorium_top
 
    // FIXME: Eliminate any of these that aren't used
    localparam pm_size             = `c_pm_size;
-   localparam dm_size             = `c_dm_size;
+   localparam DM_SIZE             = (DMEM_SIZE <= 2) ? 2 : DMEM_SIZE;
    localparam PM_REAL_SIZE        = DESIGN_CONFIG[3] ? pm_size : 8;
    localparam dm_int_sram_read_ws = `c_dm_int_sram_read_ws;
    localparam UFM_ADR_WIDTH = 13; // (For 32KB pmem = 16KInstructions = 8K 32-bit accesses = 13 bit address)
@@ -135,6 +141,9 @@ module xlr8_alorium_top
    localparam USE_NEOPIXEL_UNIT  = APP_XB0_ENABLE[2];
    localparam USE_QUADRATURE_UNIT     = APP_XB0_ENABLE[3];
    localparam USE_PID_UNIT       = APP_XB0_ENABLE[4];
+   localparam DC_FILLER = DESIGN_CONFIG[9:0]; // trying to work around Quartus QXP issue
+//   localparam DESIGN_CONFIG_WITH_DMEM = {DC_FILLER[9:0],DM_SIZE[7:0],DESIGN_CONFIG[13:0]};
+   localparam DESIGN_CONFIG_WITH_DMEM = {DM_SIZE,DESIGN_CONFIG[13:0]};
 
    logic        RXD_rcv;
    /*AUTOREGINPUT*/
@@ -218,14 +227,17 @@ module xlr8_alorium_top
    logic [5:0]             porta_ddrx;
    logic [5:0]             porta_pinx;
    logic [5:0]             porta_portx;
+   logic                   porta_pcint;
    logic [5:0]             porte_pads;
    logic [5:0]             porte_ddrx;
    logic [5:0]             porte_pinx;
    logic [5:0]             porte_portx;
+   logic                   porte_pcint;
    logic [5:0]             portg_pads;
    logic [5:0]             portg_ddrx;
    logic [5:0]             portg_pinx;
    logic [5:0]             portg_portx;
+   logic                   portg_pcint;
 `endif
    logic                   pwr_on_nrst;            // From clocks_inst of xlr8_clocks.v
    logic                   rst_flash_n;            // From uc_top_wrp_vlog_inst of `XLR8_AVR_CORE_MODULE_NAME.v
@@ -600,7 +612,7 @@ module xlr8_alorium_top
    //
    //----------------------------------------------------------------------
    // Data Memory (SRAM)
-   xlr8_d_mem #(.dm_size(dm_size))
+   xlr8_d_mem #(.dm_size(DM_SIZE))
    d_mem_inst(
               .cp2     (clk_cpu),
               .ce      (dm_ce),
@@ -748,13 +760,8 @@ module xlr8_alorium_top
       .mosii                (mosii),
       .scki                 (scki),
       .ss_b                 (ss_b),
-`ifdef HINJ_BOARD
-      .sdain                ((sdain&p5[4])), // Tying extra I2C port in from Port PC
-      .sclin                ((sclin&p5[3])), // Tying extra I2C port in from Port PC
-`else
       .sdain                (sdain),
       .sclin                (sclin),
-`endif      
       .pm_rd_data           (pm_rd_data[15:0]),
       .pm_core_rd_data      (pm_core_rd_data[15:0]),
       .dm_din               (dm_din[7:0]),
@@ -831,7 +838,7 @@ module xlr8_alorium_top
                .READREG3_VAL            (8'h0),
                /*AUTOINSTPARAM*/
                // Parameters
-               .DESIGN_CONFIG             (DESIGN_CONFIG),
+               .DESIGN_CONFIG             (DESIGN_CONFIG_WITH_DMEM),
                .APP_XB0_ENABLE            (APP_XB0_ENABLE),
                .CLKSPD_ADDR               (CLKSPD_ADDR))
    gpio_inst (/*AUTOINST*/
@@ -894,36 +901,40 @@ module xlr8_alorium_top
 
    //----------------------------------------------------------------------
    // Instance Name:  pport_a_inst
-   // Module Type:    avr_port
+   // Module Type:    xlr8_avr_port
    //
    //----------------------------------------------------------------------
-   avr_port #(
-              .PORTX_ADDR   (PORTA_Address),
-              .DDRX_ADDR    (DDRA_Address),
-              .PINX_ADDR    (PINA_Address),
-              .WIDTH        (6))
-   pport_a_inst(
-                // Clock and Reset
-                .rstn        (core_rstn),
-                .clk         (clk_io),
-                .clken       (1'b1),
-                // I/O
-                .adr         (io_arb_mux_adr),
-                .dbus_in     (io_arb_mux_dbusout),
-                .dbus_out    (pport_a_io_slv_dbusout),
-                .iore        (io_arb_mux_iore),
-                .iowe        (io_arb_mux_iowe),
-                .io_out_en   (pport_a_io_slv_out_en),
-                // DM
-                .ramadr      (core_ramadr_lo8[7:0]),
-                .ramre       (core_ramre),
-                .ramwe       (core_ramwe),
-                .dm_sel      (core_dm_sel),
-                // External connection
-                .portx       (porta_portx),
-                .ddrx        (porta_ddrx),
-                .pinx        (porta_pinx)
-                );
+   xlr8_avr_port 
+     #(
+       .PORTX_ADDR   (PORTA_Address),
+       .DDRX_ADDR    (DDRA_Address),
+       .PINX_ADDR    (PINA_Address),
+       .PCMSK_ADDR   (MSKA_Address),
+       .WIDTH        (6))
+   pport_a_inst
+     (
+      // Clock and Reset
+      .rstn        (core_rstn),
+      .clk         (clk_io),
+      .clken       (1'b1),
+      // I/O
+      .adr         (io_arb_mux_adr),
+      .dbus_in     (io_arb_mux_dbusout),
+      .dbus_out    (pport_a_io_slv_dbusout),
+      .iore        (io_arb_mux_iore),
+      .iowe        (io_arb_mux_iowe),
+      .io_out_en   (pport_a_io_slv_out_en),
+      // DM
+      .ramadr      (core_ramadr_lo8[7:0]),
+      .ramre       (core_ramre),
+      .ramwe       (core_ramwe),
+      .dm_sel      (core_dm_sel),
+      // External connection
+      .portx       (porta_portx),
+      .ddrx        (porta_ddrx),
+      .pinx        (porta_pinx),
+      .pcifr_set   (porta_pcint) //                     Pin Change Int to xlr8_pcint
+      );
    
    // === PORT E === PORT E === PORT E === PORT E === PORT E === PORT E ===
    
@@ -959,36 +970,40 @@ module xlr8_alorium_top
 
    //----------------------------------------------------------------------
    // Instance Name:  pport_e_inst
-   // Module Type:    avr_port
+   // Module Type:    xlr8_avr_port
    //
    //----------------------------------------------------------------------
-   avr_port #(
-              .PORTX_ADDR   (PORTE_Address),
-              .DDRX_ADDR    (DDRE_Address),
-              .PINX_ADDR    (PINE_Address),
-              .WIDTH        (6))
-   pport_e_inst(
-                // Clock and Reset
-                .rstn        (core_rstn),
-                .clk         (clk_io),
-                .clken       (1'b1),
-                // I/O
-                .adr         (io_arb_mux_adr),
-                .dbus_in     (io_arb_mux_dbusout),
-                .dbus_out    (pport_e_io_slv_dbusout),
-                .iore        (io_arb_mux_iore),
-                .iowe        (io_arb_mux_iowe),
-                .io_out_en   (pport_e_io_slv_out_en),
-                // DM
-                .ramadr      (core_ramadr_lo8[7:0]),
-                .ramre       (core_ramre),
-                .ramwe       (core_ramwe),
-                .dm_sel      (core_dm_sel),
-                // External connection
-                .portx       (porte_portx),
-                .ddrx        (porte_ddrx),
-                .pinx        (porte_pinx)
-                );
+   xlr8_avr_port 
+     #(
+       .PORTX_ADDR   (PORTE_Address),
+       .DDRX_ADDR    (DDRE_Address),
+       .PINX_ADDR    (PINE_Address),
+       .PCMSK_ADDR   (MSKE_Address),
+       .WIDTH        (6))
+   pport_e_inst
+     (
+      // Clock and Reset
+      .rstn        (core_rstn),
+      .clk         (clk_io),
+      .clken       (1'b1),
+      // I/O
+      .adr         (io_arb_mux_adr),
+      .dbus_in     (io_arb_mux_dbusout),
+      .dbus_out    (pport_e_io_slv_dbusout),
+      .iore        (io_arb_mux_iore),
+      .iowe        (io_arb_mux_iowe),
+      .io_out_en   (pport_e_io_slv_out_en),
+      // DM
+      .ramadr      (core_ramadr_lo8[7:0]),
+      .ramre       (core_ramre),
+      .ramwe       (core_ramwe),
+      .dm_sel      (core_dm_sel),
+      // External connection
+      .portx       (porte_portx),
+      .ddrx        (porte_ddrx),
+      .pinx        (porte_pinx),
+      .pcifr_set   (porte_pcint) //                     Pin Change Int to xlr8_pcint
+      );
    
    // === PORT G === PORT G === PORT G === PORT G === PORT G === PORT G ===
    
@@ -1024,82 +1039,83 @@ module xlr8_alorium_top
 
    //----------------------------------------------------------------------
    // Instance Name:  pport_g_inst
-   // Module Type:    avr_port
+   // Module Type:    xlr8_avr_port
    //
    //----------------------------------------------------------------------
-   avr_port #(
-              .PORTX_ADDR   (PORTG_Address),
-              .DDRX_ADDR    (DDRG_Address),
-              .PINX_ADDR    (PING_Address),
-              .WIDTH        (6))
-   pport_g_inst(
-                // Clock and Reset
-                .rstn        (core_rstn),
-                .clk         (clk_io),
-                .clken       (1'b1),
-                // I/O
-                .adr         (io_arb_mux_adr),
-                .dbus_in     (io_arb_mux_dbusout),
-                .dbus_out    (pport_g_io_slv_dbusout),
-                .iore        (io_arb_mux_iore),
-                .iowe        (io_arb_mux_iowe),
-                .io_out_en   (pport_g_io_slv_out_en),
-                // DM
-                .ramadr      (core_ramadr_lo8[7:0]),
-                .ramre       (core_ramre),
-                .ramwe       (core_ramwe),
-                .dm_sel      (core_dm_sel),
-                // External connection
-                .portx       (portg_portx),
-                .ddrx        (portg_ddrx),
-                .pinx        (portg_pinx)
-                );
+   xlr8_avr_port 
+     #(
+       .PORTX_ADDR   (PORTG_Address),
+       .DDRX_ADDR    (DDRG_Address),
+       .PINX_ADDR    (PING_Address),
+       .PCMSK_ADDR   (MSKG_Address),
+       .WIDTH        (6))
+   pport_g_inst
+     (
+      // Clock and Reset
+      .rstn        (core_rstn),
+      .clk         (clk_io),
+      .clken       (1'b1),
+      // I/O
+      .adr         (io_arb_mux_adr),
+      .dbus_in     (io_arb_mux_dbusout),
+      .dbus_out    (pport_g_io_slv_dbusout),
+      .iore        (io_arb_mux_iore),
+      .iowe        (io_arb_mux_iowe),
+      .io_out_en   (pport_g_io_slv_out_en),
+      // DM
+      .ramadr      (core_ramadr_lo8[7:0]),
+      .ramre       (core_ramre),
+      .ramwe       (core_ramwe),
+      .dm_sel      (core_dm_sel),
+      // External connection
+      .portx       (portg_portx),
+      .ddrx        (portg_ddrx),
+      .pinx        (portg_pinx),
+      .pcifr_set   (portg_pcint) //                     Pin Change Int to xlr8_pcint
+      );
+   
+   //----------------------------------------------------------------------
+   // Instance Name:  sno_pcint_inst
+   // Module Type:    xlr8_pcint
+   //
+   //----------------------------------------------------------------------
+   xlr8_pcint
+     #(
+       .XICR_Address (SPCICR_Address),
+       .XIFR_Address (SPCIFR_Address),
+       .XMSK_Address (SPCIMSK_Address),
+       .WIDTH        (3)
+       )
+   sno_pcint_inst
+     (
+      // Clock and Reset
+      .rstn         (core_rstn),
+      .clk          (clk_io),
+      // I/O
+      .adr          (io_arb_mux_adr),
+      .dbus_in      (io_arb_mux_dbusout),
+      .dbus_out     (sno_pcint_io_slv_dbusout),
+      .iore         (io_arb_mux_iore),
+      .iowe         (io_arb_mux_iowe),
+      .out_en       (sno_pcint_io_slv_out_en),
+      // DM
+      .ramadr       (core_ramadr_lo8[7:0]),
+      .ramre        (core_ramre),
+      .ramwe        (core_ramwe),
+      .dm_sel       (core_dm_sel),
+      // 
+      .x_int_in     ({portg_pcint,porte_pcint,porta_pcint}),
+      .x_irq        (xlr8_bi_irq),
+      .x_irq_ack    (3'h0) // Don't use acks here
+      );
+   
+
 `endif //  `ifdef SNO_BOARD
    // ======================= END of Extra Sno Board Ports ======================
    
    
    // ======================= START of Extra Hinj Board Ports ======================
 `ifdef HINJ_BOARD
-
-   // Merge the I2C stuff from the Core into the PC[1:0] bits
-   logic [3:2]                       hinj_i2c_ddoe;
-   logic [3:2]                       hinj_i2c_ddov;
-   logic [3:2]                       hinj_i2c_pvoe;
-   logic [3:2]                       hinj_i2c_pvov;
-
-   logic [NUM_PINS-1:NUM_UNO_PINS]   hinj_xb_ddoe;
-   logic [NUM_PINS-1:NUM_UNO_PINS]   hinj_xb_ddov;
-   logic [NUM_PINS-1:NUM_UNO_PINS]   hinj_xb_pvoe;
-   logic [NUM_PINS-1:NUM_UNO_PINS]   hinj_xb_pvov;
-   
-   localparam PABW = 16; // PA + PB Width
-   localparam PCW = 8; //   PC Width
-   // Ports B, X, G, SW, LD, PD Width
-   localparam PBXSLGDW = NUM_PINS - PABW - PCW - NUM_UNO_PINS; 
-
-   // Set up the pin control so that if we want to use the output we drive a zero, 
-   // otherwise the output should be Z
-   assign hinj_i2c_ddoe[3] = twen;
-   assign hinj_i2c_ddov[3] = !sdaout;
-   assign hinj_i2c_pvoe[3] = twen && !sdaout;
-   assign hinj_i2c_pvov[3] = 1'b0;
-
-   assign hinj_i2c_ddoe[2] = twen;
-   assign hinj_i2c_ddov[2] = !sclout;
-   assign hinj_i2c_pvoe[2] = twen && !sclout;
-   assign hinj_i2c_pvov[2] = 1'b0;
-   
-   // Build a bus with the I2C embbedded at the Port PC[1:0] location
-   assign hinj_xb_ddoe = {{PBXSLGDW{1'b0}},4'h0,hinj_i2c_ddoe,2'h0,{PABW{1'b0}}} | 
-                         xb_ddoe[NUM_PINS-1:NUM_UNO_PINS];
-   assign hinj_xb_ddov = {{PBXSLGDW{1'b0}},4'h0,hinj_i2c_ddov,2'h0,{PABW{1'b0}}} | 
-                         xb_ddov[NUM_PINS-1:NUM_UNO_PINS];
-   assign hinj_xb_pvoe = {{PBXSLGDW{1'b0}},4'h0,hinj_i2c_pvoe,2'h0,{PABW{1'b0}}} | 
-                         xb_pvoe[NUM_PINS-1:NUM_UNO_PINS];
-   assign hinj_xb_pvov = {{PBXSLGDW{1'b0}},4'h0,hinj_i2c_pvov,2'h0,{PABW{1'b0}}} | 
-                         xb_pvov[NUM_PINS-1:NUM_UNO_PINS];
-                          
-
    //----------------------------------------------------------------------
    // Instance Name:  hinj_gpio_inst
    // Module Type:    xlr8_hinj_gpio
@@ -1180,10 +1196,10 @@ module xlr8_alorium_top
       .ramre       (core_ramre),
       .ramwe       (core_ramwe),
       .dm_sel      (core_dm_sel),
-      .xb_ddoe     (hinj_xb_ddoe[NUM_PINS-1:NUM_UNO_PINS]),
-      .xb_ddov     (hinj_xb_ddov[NUM_PINS-1:NUM_UNO_PINS]),
-      .xb_pvoe     (hinj_xb_pvoe[NUM_PINS-1:NUM_UNO_PINS]),
-      .xb_pvov     (hinj_xb_pvov[NUM_PINS-1:NUM_UNO_PINS]),
+      .xb_ddoe     (xb_ddoe[NUM_PINS-1:NUM_UNO_PINS]),
+      .xb_ddov     (xb_ddov[NUM_PINS-1:NUM_UNO_PINS]),
+      .xb_pvoe     (xb_pvoe[NUM_PINS-1:NUM_UNO_PINS]),
+      .xb_pvov     (xb_pvov[NUM_PINS-1:NUM_UNO_PINS]),
       // Outputs
       .port_pads   ({b[2:1], //                     PORTBT
                      xbee_d04,xbee_d07,xbee_d09, // PORTX1
@@ -1210,7 +1226,7 @@ module xlr8_alorium_top
    //----------------------------------------------------------------------
    xlr8_hinj_bixb 
      #(
-       .DESIGN_CONFIG  (DESIGN_CONFIG),
+       .DESIGN_CONFIG  (DESIGN_CONFIG_WITH_DMEM),
        .WIFI_SPCR_ADDR (WIFI_SPCR_ADDR),
        .WIFI_SPSR_ADDR (WIFI_SPSR_ADDR),
        .WIFI_SPDR_ADDR (WIFI_SPDR_ADDR),
@@ -1593,8 +1609,11 @@ module xlr8_alorium_top
    //----------------------------------------------------------------------
    openxlr8
      #(
-       .DESIGN_CONFIG     (DESIGN_CONFIG),
-       .NUM_PINS          (NUM_PINS)
+       .DESIGN_CONFIG     (DESIGN_CONFIG_WITH_DMEM),
+       .NUM_PINS          (NUM_PINS),
+       .OX8ICR_Address    (OX8ICR_Address),
+       .OX8IFR_Address    (OX8IFR_Address),
+       .OX8MSK_Address    (OX8MSK_Address)       
        )
    xb_openxlr8_inst 
      (// Clock and reset

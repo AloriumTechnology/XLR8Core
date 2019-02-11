@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deploy
- date="2018.02.25.18:49:06"
- outputDirectory="/scratch/u/steve/r7107/view_current/trunk/atmega328clone/library/XLR8Core/extras/rtl/ip/int_osc/int_osc/">
+ date="2018.02.21.14:48:32"
+ outputDirectory="/scratch/u/steve/r7107/view_current/trunk/atmega328clone/ip/int_osc/int_osc/">
  <perimeter>
   <parameter
      name="AUTO_GENERATION_ID"
@@ -49,38 +49,38 @@
  </perimeter>
  <entity
    path=""
-   parameterizationKey="int_osc:1.0:AUTO_DEVICE=10M08SAU169C8G,AUTO_DEVICE_FAMILY=MAX 10,AUTO_DEVICE_SPEEDGRADE=8,AUTO_GENERATION_ID=1519606146,AUTO_UNIQUE_ID=(altera_int_osc:17.1:CBX_AUTO_BLACKBOX=ALL,CLOCK_FREQUENCY=116,CLOCK_FREQUENCY_1=116,CLOCK_FREQUENCY_2=77,DEVICE_FAMILY=MAX 10,DEVICE_ID=08,INFORMATION=The output frequency for 10M02, 10M04, 10M08, 10M16, and 10M25 devices is 55~116MHz &lt;br&gt;The output frequency for 10M40, and 10M50 devices is 35~77MHz &lt;br&gt;,PART_NAME=10M08SAU169C8G)"
+   parameterizationKey="int_osc:1.0:AUTO_DEVICE=10M08SAU169C8G,AUTO_DEVICE_FAMILY=MAX 10,AUTO_DEVICE_SPEEDGRADE=8,AUTO_GENERATION_ID=1519246112,AUTO_UNIQUE_ID=(altera_int_osc:17.1:CBX_AUTO_BLACKBOX=ALL,CLOCK_FREQUENCY=116,CLOCK_FREQUENCY_1=116,CLOCK_FREQUENCY_2=77,DEVICE_FAMILY=MAX 10,DEVICE_ID=08,INFORMATION=The output frequency for 10M02, 10M04, 10M08, 10M16, and 10M25 devices is 55~116MHz &lt;br&gt;The output frequency for 10M40, and 10M50 devices is 35~77MHz &lt;br&gt;,PART_NAME=10M08SAU169C8G)"
    instancePathKey="int_osc"
    kind="int_osc"
    version="1.0"
    name="int_osc">
-  <parameter name="AUTO_GENERATION_ID" value="1519606146" />
+  <parameter name="AUTO_GENERATION_ID" value="1519246112" />
   <parameter name="AUTO_DEVICE" value="10M08SAU169C8G" />
   <parameter name="AUTO_DEVICE_FAMILY" value="MAX 10" />
   <parameter name="AUTO_UNIQUE_ID" value="" />
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="8" />
   <generatedFiles>
    <file
-       path="/scratch/u/steve/r7107/view_current/trunk/atmega328clone/library/XLR8Core/extras/rtl/ip/int_osc/int_osc/synthesis/int_osc.v"
+       path="/scratch/u/steve/r7107/view_current/trunk/atmega328clone/ip/int_osc/int_osc/synthesis/int_osc.v"
        type="VERILOG" />
   </generatedFiles>
   <childGeneratedFiles>
    <file
-       path="/scratch/u/steve/r7107/view_current/trunk/atmega328clone/library/XLR8Core/extras/rtl/ip/int_osc/int_osc/synthesis/submodules/altera_int_osc.v"
+       path="/scratch/u/steve/r7107/view_current/trunk/atmega328clone/ip/int_osc/int_osc/synthesis/submodules/altera_int_osc.v"
        type="VERILOG"
        attributes="" />
    <file
-       path="/scratch/u/steve/r7107/view_current/trunk/atmega328clone/library/XLR8Core/extras/rtl/ip/int_osc/int_osc/synthesis/submodules/altera_int_osc.sdc"
+       path="/scratch/u/steve/r7107/view_current/trunk/atmega328clone/ip/int_osc/int_osc/synthesis/submodules/altera_int_osc.sdc"
        type="SDC"
        attributes="" />
   </childGeneratedFiles>
   <sourceFiles>
    <file
-       path="/scratch/u/steve/r7107/view_current/trunk/atmega328clone/library/XLR8Core/extras/rtl/ip/int_osc/int_osc.qsys" />
+       path="/scratch/u/steve/r7107/view_current/trunk/atmega328clone/ip/int_osc/int_osc.qsys" />
   </sourceFiles>
   <childSourceFiles>
    <file
-       path="/scratch/cad/tools/altera/17.1/ip/altera/altera_int_osc/altera_int_osc_hw.tcl" />
+       path="/cad/tools/altera/17.1/ip/altera/altera_int_osc/altera_int_osc_hw.tcl" />
   </childSourceFiles>
   <messages>
    <message level="Debug" culprit="int_osc">queue size: 0 starting:int_osc "int_osc"</message>
@@ -121,18 +121,18 @@
   <parameter name="DEVICE_ID" value="08" />
   <generatedFiles>
    <file
-       path="/scratch/u/steve/r7107/view_current/trunk/atmega328clone/library/XLR8Core/extras/rtl/ip/int_osc/int_osc/synthesis/submodules/altera_int_osc.v"
+       path="/scratch/u/steve/r7107/view_current/trunk/atmega328clone/ip/int_osc/int_osc/synthesis/submodules/altera_int_osc.v"
        type="VERILOG"
        attributes="" />
    <file
-       path="/scratch/u/steve/r7107/view_current/trunk/atmega328clone/library/XLR8Core/extras/rtl/ip/int_osc/int_osc/synthesis/submodules/altera_int_osc.sdc"
+       path="/scratch/u/steve/r7107/view_current/trunk/atmega328clone/ip/int_osc/int_osc/synthesis/submodules/altera_int_osc.sdc"
        type="SDC"
        attributes="" />
   </generatedFiles>
   <childGeneratedFiles/>
   <sourceFiles>
    <file
-       path="/scratch/cad/tools/altera/17.1/ip/altera/altera_int_osc/altera_int_osc_hw.tcl" />
+       path="/cad/tools/altera/17.1/ip/altera/altera_int_osc/altera_int_osc_hw.tcl" />
   </sourceFiles>
   <childSourceFiles/>
   <instantiator instantiator="int_osc" as="int_osc_0" />

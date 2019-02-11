@@ -1,5 +1,5 @@
 Info: Starting: Create simulation model
-Info: qsys-generate /scratch/u/steve/r7107/view_current/trunk/atmega328clone/library/XLR8Core/extras/rtl/ip/int_osc/int_osc.qsys --simulation=VERILOG --allow-mixed-language-simulation --output-directory=/scratch/u/steve/r7107/view_current/trunk/atmega328clone/library/XLR8Core/extras/rtl/ip/int_osc/int_osc/simulation --family="MAX 10" --part=10M08SAU169C8G
+Info: qsys-generate /scratch/u/steve/r7107/view_current/trunk/atmega328clone/ip/int_osc/int_osc.qsys --simulation=VERILOG --allow-mixed-language-simulation --output-directory=/scratch/u/steve/r7107/view_current/trunk/atmega328clone/ip/int_osc/int_osc/simulation --family="MAX 10" --part=10M08SAU169C8G
 Progress: Loading int_osc/int_osc.qsys
 Progress: Reading input file
 Progress: Adding int_osc_0 [altera_int_osc 17.1]
@@ -15,27 +15,27 @@ Info: int_osc: Done "int_osc" with 2 modules, 3 files
 Info: qsys-generate succeeded.
 Info: Finished: Create simulation model
 Info: Starting: Create Modelsim Project.
-Info: sim-script-gen --spd=/scratch/u/steve/r7107/view_current/trunk/atmega328clone/library/XLR8Core/extras/rtl/ip/int_osc/int_osc/int_osc.spd --output-directory=/scratch/u/steve/r7107/view_current/trunk/atmega328clone/library/XLR8Core/extras/rtl/ip/int_osc/int_osc/simulation/ --use-relative-paths=true
-Info: Doing: ip-make-simscript --spd=/scratch/u/steve/r7107/view_current/trunk/atmega328clone/library/XLR8Core/extras/rtl/ip/int_osc/int_osc/int_osc.spd --output-directory=/scratch/u/steve/r7107/view_current/trunk/atmega328clone/library/XLR8Core/extras/rtl/ip/int_osc/int_osc/simulation/ --use-relative-paths=true
-Info: Generating the following file(s) for MODELSIM simulator in /scratch/u/steve/r7107/view_current/trunk/atmega328clone/library/XLR8Core/extras/rtl/ip/int_osc/int_osc/simulation/ directory:
+Info: sim-script-gen --spd=/scratch/u/steve/r7107/view_current/trunk/atmega328clone/ip/int_osc/int_osc/int_osc.spd --output-directory=/scratch/u/steve/r7107/view_current/trunk/atmega328clone/ip/int_osc/int_osc/simulation/ --use-relative-paths=true
+Info: Doing: ip-make-simscript --spd=/scratch/u/steve/r7107/view_current/trunk/atmega328clone/ip/int_osc/int_osc/int_osc.spd --output-directory=/scratch/u/steve/r7107/view_current/trunk/atmega328clone/ip/int_osc/int_osc/simulation/ --use-relative-paths=true
+Info: Generating the following file(s) for MODELSIM simulator in /scratch/u/steve/r7107/view_current/trunk/atmega328clone/ip/int_osc/int_osc/simulation/ directory:
 Info: 	mentor/msim_setup.tcl
-Info: Generating the following file(s) for VCS simulator in /scratch/u/steve/r7107/view_current/trunk/atmega328clone/library/XLR8Core/extras/rtl/ip/int_osc/int_osc/simulation/ directory:
+Info: Generating the following file(s) for VCS simulator in /scratch/u/steve/r7107/view_current/trunk/atmega328clone/ip/int_osc/int_osc/simulation/ directory:
 Info: 	synopsys/vcs/vcs_setup.sh
-Info: Generating the following file(s) for VCSMX simulator in /scratch/u/steve/r7107/view_current/trunk/atmega328clone/library/XLR8Core/extras/rtl/ip/int_osc/int_osc/simulation/ directory:
+Info: Generating the following file(s) for VCSMX simulator in /scratch/u/steve/r7107/view_current/trunk/atmega328clone/ip/int_osc/int_osc/simulation/ directory:
 Info: 	synopsys/vcsmx/synopsys_sim.setup
 Info: 	synopsys/vcsmx/vcsmx_setup.sh
-Info: Generating the following file(s) for NCSIM simulator in /scratch/u/steve/r7107/view_current/trunk/atmega328clone/library/XLR8Core/extras/rtl/ip/int_osc/int_osc/simulation/ directory:
+Info: Generating the following file(s) for NCSIM simulator in /scratch/u/steve/r7107/view_current/trunk/atmega328clone/ip/int_osc/int_osc/simulation/ directory:
 Info: 	cadence/cds.lib
 Info: 	cadence/hdl.var
 Info: 	cadence/ncsim_setup.sh
 Info: 	1 .cds.lib files in cadence/cds_libs/ directory
-Info: Generating the following file(s) for RIVIERA simulator in /scratch/u/steve/r7107/view_current/trunk/atmega328clone/library/XLR8Core/extras/rtl/ip/int_osc/int_osc/simulation/ directory:
+Info: Generating the following file(s) for RIVIERA simulator in /scratch/u/steve/r7107/view_current/trunk/atmega328clone/ip/int_osc/int_osc/simulation/ directory:
 Info: 	aldec/rivierapro_setup.tcl
-Info: For information on how to simulate your IP, see the explanatory comments in the simulator-specific subdirectories under /scratch/u/steve/r7107/view_current/trunk/atmega328clone/library/XLR8Core/extras/rtl/ip/int_osc/int_osc/simulation/.
+Info: For information on how to simulate your IP, see the explanatory comments in the simulator-specific subdirectories under /scratch/u/steve/r7107/view_current/trunk/atmega328clone/ip/int_osc/int_osc/simulation/.
 Info: Regenerate these scripts whenever you make any change to any Quartus-generated IP in your project.
 Info: Finished: Create Modelsim Project.
 Info: Starting: Create block symbol file (.bsf)
-Info: qsys-generate /scratch/u/steve/r7107/view_current/trunk/atmega328clone/library/XLR8Core/extras/rtl/ip/int_osc/int_osc.qsys --block-symbol-file --output-directory=/scratch/u/steve/r7107/view_current/trunk/atmega328clone/library/XLR8Core/extras/rtl/ip/int_osc/int_osc --family="MAX 10" --part=10M08SAU169C8G
+Info: qsys-generate /scratch/u/steve/r7107/view_current/trunk/atmega328clone/ip/int_osc/int_osc.qsys --block-symbol-file --output-directory=/scratch/u/steve/r7107/view_current/trunk/atmega328clone/ip/int_osc/int_osc --family="MAX 10" --part=10M08SAU169C8G
 Progress: Loading int_osc/int_osc.qsys
 Progress: Reading input file
 Progress: Adding int_osc_0 [altera_int_osc 17.1]
@@ -48,7 +48,7 @@ Info: qsys-generate succeeded.
 Info: Finished: Create block symbol file (.bsf)
 Info: 
 Info: Starting: Create HDL design files for synthesis
-Info: qsys-generate /scratch/u/steve/r7107/view_current/trunk/atmega328clone/library/XLR8Core/extras/rtl/ip/int_osc/int_osc.qsys --synthesis=VERILOG --greybox --output-directory=/scratch/u/steve/r7107/view_current/trunk/atmega328clone/library/XLR8Core/extras/rtl/ip/int_osc/int_osc/synthesis --family="MAX 10" --part=10M08SAU169C8G
+Info: qsys-generate /scratch/u/steve/r7107/view_current/trunk/atmega328clone/ip/int_osc/int_osc.qsys --synthesis=VERILOG --output-directory=/scratch/u/steve/r7107/view_current/trunk/atmega328clone/ip/int_osc/int_osc/synthesis --family="MAX 10" --part=10M08SAU169C8G
 Progress: Loading int_osc/int_osc.qsys
 Progress: Reading input file
 Progress: Adding int_osc_0 [altera_int_osc 17.1]
@@ -61,7 +61,5 @@ Info: int_osc: Generating int_osc "int_osc" for QUARTUS_SYNTH
 Info: int_osc_0: Generating top-level entity altera_int_osc.
 Info: int_osc_0: "int_osc" instantiated altera_int_osc "int_osc_0"
 Info: int_osc: Done "int_osc" with 2 modules, 3 files
-Info: Generating third-party timing and resource estimation model ...
-Info: Done generating third-party timing and resource estimation model.
 Info: qsys-generate succeeded.
 Info: Finished: Create HDL design files for synthesis

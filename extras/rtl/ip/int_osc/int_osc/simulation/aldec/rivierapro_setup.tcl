@@ -12,7 +12,7 @@
 # or its authorized distributors. Please refer to the applicable 
 # agreement for further details.
 
-# ACDS 17.1 590 linux 2018.02.25.18:49:06
+# ACDS 17.1 590 linux 2018.02.21.14:48:31
 # ----------------------------------------
 # Auto-generated simulation script rivierapro_setup.tcl
 # ----------------------------------------
@@ -113,7 +113,7 @@ if ![info exists QSYS_SIMDIR] {
 }
 
 if ![info exists QUARTUS_INSTALL_DIR] { 
-  set QUARTUS_INSTALL_DIR "/scratch/cad/tools/altera/17.1/quartus/"
+  set QUARTUS_INSTALL_DIR "/cad/tools/altera/17.1/quartus/"
 }
 
 if ![info exists USER_DEFINED_COMPILE_OPTIONS] { 

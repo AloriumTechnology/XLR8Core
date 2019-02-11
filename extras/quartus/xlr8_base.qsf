@@ -1,5 +1,5 @@
 #==============================================================================
-# Copyright (c) 2016 Alorim Technology.  All right reserved.
+# Copyright (c) 2016 Alorium Technology.  All right reserved.
 #==============================================================================
 #
 # File Name  : xlr8_base.qsf
@@ -15,9 +15,11 @@
 # Top level rtl, etc.
 set_global_assignment -name SEARCH_PATH ../../../XLR8Core/extras/rtl
 set_global_assignment -name SYSTEMVERILOG_FILE ../../../XLR8Core/extras/rtl/xlr8_alorium_top.v
-set_global_assignment -name SYSTEMVERILOG_FILE ../rtl/openxlr8.v
+set_global_assignment -name SYSTEMVERILOG_FILE ../../../XLR8Build/extras/rtl/openxlr8.v
+set_global_assignment -name SYSTEMVERILOG_FILE ../../../XLR8Build/extras/rtl/pll16.vh
 set_global_assignment -name TOP_LEVEL_ENTITY xlr8_alorium_top
-set_global_assignment -name SDC_FILE ../../../XLR8Core/extras/quartus/xlr8_top.sdc
+# SDC file now read in by the BRD_top_core.qsf file
+#set_global_assignment -name SDC_FILE ../../../XLR8Core/extras/quartus/xlr8_top.sdc
 # Built-in XBs
 # Float
 set_global_assignment -name SEARCH_PATH ../../../XLR8Float/extras/rtl/xlr8_float
@@ -55,11 +57,12 @@ set_global_assignment -name EDA_EXTRA_ELAB_OPTION "modelsim=-sv_lib ../../../../
 set_global_assignment -name POWER_DEFAULT_TOGGLE_RATE "12.5 %"
 set_global_assignment -name POWER_DEFAULT_INPUT_IO_TOGGLE_RATE "12.5 %"
 set_global_assignment -name POWER_USE_PVA OFF
-set_global_assignment -name EDA_TEST_BENCH_FILE ../modelsim/xlr8_board.v -section_id xlr8_tb
-set_global_assignment -name EDA_TEST_BENCH_FILE ../modelsim/xlr8_sim_support.sv -section_id xlr8_tb
-set_global_assignment -name EDA_TEST_BENCH_FILE ../modelsim/xlr8_tb.sv -section_id xlr8_tb
+set_global_assignment -name EDA_TEST_BENCH_FILE ../../../XLR8Core/extras/rtl/avr_adr_pack.vh -section_id xlr8_tb
+set_global_assignment -name EDA_TEST_BENCH_FILE ../../../XLR8Core/extras/modelsim_windows/xlr8_board.v -section_id xlr8_tb
+set_global_assignment -name EDA_TEST_BENCH_FILE ../../../XLR8Core/extras/modelsim_windows/xlr8_sim_support.sv -section_id xlr8_tb
+set_global_assignment -name EDA_TEST_BENCH_FILE ../../../XLR8Core/extras/modelsim_windows/xlr8_tb.sv -section_id xlr8_tb
 set_global_assignment -name EDA_TEST_BENCH_FILE ../../../XLR8Core/extras/modelsim_windows/uc_top_wrap_dpi.sv -section_id xlr8_tb
-set_global_assignment -name EDA_TEST_BENCH_FILE ../../../XLR8Core/extras/modelsim_windows/xlr8_atmega328clone.sv -section_id xlr8_t
+# set_global_assignment -name EDA_TEST_BENCH_FILE ../../../XLR8Core/extras/modelsim_windows/xlr8_atmega328clone.sv -section_id xlr8_t
 
 
 

@@ -56,111 +56,114 @@ module uc_top_wrap_dpi
                          )
 
   (
-   input                            nrst,
-   input                            clk,
-   input                            en16mhz, // clock enable at 16MHz rate
-   input                            en128khz,
-   input                            clk_adcref,
-   input                            locked_adcref,
+    input               nrst,
+    input               clk,
+    input [31:0]        param_app_xb0_enable,
+    input               en16mhz, // clock enable at 16MHz rate
+    input               en128khz,
+    input               clk_adcref,
+    input               locked_adcref,
+    
+    input               pwr_on_nrst,
+    output logic        core_rstn, // includes all reset sources
+    output logic        rst_flash_n, // reset domain for flash+pmem
+    // PORT related
+    output logic [5:0]  portb_portx, // [6:7] unused for port B, used for XTAL
+    output logic [5:0]  portb_ddrx,
+    input [5:0]         portb_pinx,
+    output logic [5:0]  portc_portx, // [6] unused for port C, used for RESET
+    output logic [5:0]  portc_ddrx,
+    input [5:0]         portc_pinx,
+    output logic [7:0]  portd_portx,
+    output logic [7:0]  portd_ddrx,
+    input [7:0]         portd_pinx,
+    output logic [5:0]  ADCD, // When set, corresponding PIN register on port c always reads 0
+    output logic        ANA_UP, // Choose ADC ref between AREF pin (1) and regulated 3.3V (0)
+    
+    // Timer related
+    input               T0_pin,
+    input               T1_pin,
+    input               ICP1_pin,
+    output logic        OC0A_pin,
+    output logic        OC0B_pin,
+    output logic        OC1A_pin,
+    output logic        OC1B_pin,
+    output logic        OC2A_pin,
+    output logic        OC2B_pin,
+    output logic        OC0A_enable,
+    output logic        OC0B_enable,
+    output logic        OC1A_enable,
+    output logic        OC1B_enable,
+    output logic        OC2A_enable,
+    output logic        OC2B_enable,
+    
+    // UART related
+    input               rxd,
+    output logic        uart_rx_en,
+    output logic        txd,
+    output logic        uart_tx_en,
+    
+    // SPI related
+    input               misoi,
+    input               mosii,
+    input               scki,
+    input               ss_b,
+    
+    output logic        misoo,
+    output logic        mosio,
+    output logic        scko,
+    output logic        spe,
+    output logic        spimaster,
+    
+    //I2C related
+    output logic        twen,
+    input               sdain,
+    output logic         sdaout,
+    input               sclin,
+    output logic        sclout,
+    
+    // Interrupts
+    input [23:0]        pcint_rcv,
+    output logic [23:0] pcmsk,
+    output logic [2:0]  pcie,
+    output logic [1:0]  eimsk,
+    input [1:0]         xlr8_irq, //     From xlr8_irq
+    output logic [1:0]  xlr8_irq_ack, // To xlr8_irq
+    
+    // PM interface
+    output logic        pm_ce,
+    output logic        pm_wr,
+    output logic [15:0] pm_wr_data,
+    output logic [15:0] pm_addr,
+    input logic [15:0]  pm_rd_data,
+    
+    output logic [15:0] pm_core_rd_addr,
+    input logic [15:0]  pm_core_rd_data,
+    
+    // DM interface
+    output logic  [1:0] dm_adr,
+    output logic  [7:0] dm_dout,
+    input [7:0]         dm_din,
+    output logic        dm_ce,
+    output logic        dm_we,
+    output logic  [7:0] dm_dout_rg,
+    
+    // Core Ram Interface
+    output logic [7:0]  core_ramadr_lo8,
+    output logic        core_ramre,
+    output logic        core_ramwe,
+    output logic        core_dm_sel,
+    // FP Interface
+    output logic [5:0]  io_arb_mux_adr,
+    output logic        io_arb_mux_iore,
+    output logic        io_arb_mux_iowe,
+    output logic [7:0]  io_arb_mux_dbusout,
+    input [7:0]         stgi_xf_io_slv_dbusout,
+    input               stgi_xf_io_slv_out_en,
+    output logic [7:0]  msts_dbusout,
+    output logic [8*32-1:0] gprf,
 
-   input                            pwr_on_nrst,
-   output logic                           core_rstn, // includes all reset sources
-   output logic                     rst_flash_n, // reset domain for flash+pmem
-   // PORT related
-   output logic [5:0]                     portb_portx, // [6:7] unused for port B, used for XTAL
-   output logic [5:0]                     portb_ddrx,
-   input [5:0]                      portb_pinx,
-   output logic [5:0]                     portc_portx, // [6] unused for port C, used for RESET
-   output logic [5:0]                     portc_ddrx,
-   input [5:0]                      portc_pinx,
-   output logic [7:0]                     portd_portx,
-   output logic [7:0]                     portd_ddrx,
-   input [7:0]                      portd_pinx,
-   output logic [5:0]                     ADCD, // When set, corresponding PIN register on port c always reads 0
-   output logic                           ANA_UP, // Choose ADC ref between AREF pin (1) and regulated 3.3V (0)
-
-   // Timer related
-   input                            T0_pin,
-   input                            T1_pin,
-   input                            ICP1_pin,
-   output logic                           OC0A_pin,
-   output logic                           OC0B_pin,
-   output logic                           OC1A_pin,
-   output logic                           OC1B_pin,
-   output logic                           OC2A_pin,
-   output logic                           OC2B_pin,
-   output logic                           OC0A_enable,
-   output logic                           OC0B_enable,
-   output logic                           OC1A_enable,
-   output logic                           OC1B_enable,
-   output logic                           OC2A_enable,
-   output logic                           OC2B_enable,
-
-   // UART related
-   input                            rxd,
-   output logic                           uart_rx_en,
-   output logic                           txd,
-   output logic                           uart_tx_en,
-
-   // SPI related
-   input                            misoi,
-   input                            mosii,
-   input                            scki,
-   input                            ss_b,
-
-   output logic                      misoo,
-   output logic                      mosio,
-   output logic                      scko,
-   output logic                      spe,
-   output logic                      spimaster,
-
-   //I2C related
-   output logic                      twen,
-   input                            sdain,
-   output logic                      sdaout,
-   input                            sclin,
-   output logic                      sclout,
-
-   // Interrupts
-   input [23:0]                     pcint_rcv,
-   output logic [23:0]                    pcmsk,
-   output logic [2:0]                     pcie,
-   output logic [1:0]                     eimsk,
-
-   // PM interface
-   output logic                     pm_ce,
-   output logic                     pm_wr,
-   output logic [15:0]              pm_wr_data,
-   output logic [15:0]              pm_addr,
-   input logic [15:0]               pm_rd_data,
-
-   output logic [15:0]              pm_core_rd_addr,
-   input logic [15:0]               pm_core_rd_data,
-
-   // DM interface
-   output logic [15:0]               dm_adr,
-   output logic [7:0]                dm_dout,
-   input [7:0]                      dm_din,
-   output logic                      dm_ce,
-   output logic                      dm_we,
-
-   // Core Ram Interface
-   output logic [7:0]                     core_ramadr_lo8,
-   output logic                           core_ramre,
-   output logic                           core_ramwe,
-   output logic                           core_dm_sel,
-   // FP Interface
-   output logic [5:0]                     io_arb_mux_adr,
-   output logic                           io_arb_mux_iore,
-   output logic                           io_arb_mux_iowe,
-   output logic [7:0]                     io_arb_mux_dbusout,
-   input [7:0]                      stgi_xf_io_slv_dbusout,
-   input                            stgi_xf_io_slv_out_en,
-   output logic [7:0]                     msts_dbusout,
-   output logic [8*32-1:0]                gprf,
-
-   input logic  [23:0]              xb_info,
-   output logic [23:0]              debug_bus
+    output logic [23:0] debug_bus
                         );
 
 
@@ -176,6 +179,7 @@ module uc_top_wrap_dpi
       // Assign inputs
       in.nrst = nrst;
       in.clk = clk;
+      in.param_app_xb0_enable = param_app_xb0_enable;
       in.en16mhz = en16mhz;
       in.en128khz = en128khz;
       in.clk_adcref = clk_adcref;
@@ -195,12 +199,12 @@ module uc_top_wrap_dpi
       in.sdain = sdain;
       in.sclin = sclin;
       in.pcint_rcv = pcint_rcv;
+      in.xlr8_irq = xlr8_irq;
       in.pm_rd_data = pm_rd_data;
       in.pm_core_rd_data = pm_core_rd_data;
       in.dm_din = dm_din;
       in.stgi_xf_io_slv_dbusout = stgi_xf_io_slv_dbusout;
       in.stgi_xf_io_slv_out_en = stgi_xf_io_slv_out_en;
-      in.xb_info = xb_info;
 
       // Call the model
       uc_top_wrap_wrap_run( in, out );
@@ -242,6 +246,7 @@ module uc_top_wrap_dpi
       pcmsk <= out.pcmsk;
       pcie <= out.pcie;
       eimsk <= out.eimsk;
+      xlr8_irq_ack <= out.xlr8_irq_ack;
       pm_ce <= out.pm_ce;
       pm_wr <= out.pm_wr;
       pm_wr_data <= out.pm_wr_data;
@@ -251,6 +256,7 @@ module uc_top_wrap_dpi
       dm_dout <= out.dm_dout;
       dm_ce <= out.dm_ce;
       dm_we <= out.dm_we;
+      dm_dout_rg <= out.dm_dout_rg;
       core_ramadr_lo8 <= out.core_ramadr_lo8;
       core_ramre <= out.core_ramre;
       core_ramwe <= out.core_ramwe;

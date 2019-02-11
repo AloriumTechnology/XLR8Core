@@ -94,7 +94,7 @@
 # within the Quartus project, and generate a unified
 # script which supports all the Altera IP within the design.
 # ----------------------------------------
-# ACDS 17.1 590 linux 2018.02.25.18:49:06
+# ACDS 17.1 590 linux 2018.02.21.14:48:31
 
 # ----------------------------------------
 # Initialize variables
@@ -113,7 +113,7 @@ if ![info exists QSYS_SIMDIR] {
 }
 
 if ![info exists QUARTUS_INSTALL_DIR] { 
-  set QUARTUS_INSTALL_DIR "/scratch/cad/tools/altera/17.1/quartus/"
+  set QUARTUS_INSTALL_DIR "/cad/tools/altera/17.1/quartus/"
 }
 
 if ![info exists USER_DEFINED_COMPILE_OPTIONS] { 

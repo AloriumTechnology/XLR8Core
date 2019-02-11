@@ -165,6 +165,27 @@ set_input_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_inp_dly [get
 set_input_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_inp_dly [get_ports SCL]
 set_input_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_inp_dly [get_ports SDA]
 
+set_input_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_inp_dly [get_ports {D0}]
+set_input_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_inp_dly [get_ports {D1}]
+set_input_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_inp_dly [get_ports {D22}]
+set_input_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_inp_dly [get_ports {D23}]
+set_input_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_inp_dly [get_ports {D24}]
+set_input_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_inp_dly [get_ports {D25}]
+set_input_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_inp_dly [get_ports {D26}]
+set_input_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_inp_dly [get_ports {D27}]
+set_input_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_inp_dly [get_ports {D28}]
+set_input_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_inp_dly [get_ports {D29}]
+set_input_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_inp_dly [get_ports {D30}]
+set_input_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_inp_dly [get_ports {D31}]
+set_input_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_inp_dly [get_ports {D32}]
+set_input_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_inp_dly [get_ports {D33}]
+set_input_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_inp_dly [get_ports {D34}]
+set_input_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_inp_dly [get_ports {D35}]
+set_input_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_inp_dly [get_ports {D36}]
+set_input_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_inp_dly [get_ports {D37}]
+set_input_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_inp_dly [get_ports {D38}]
+set_input_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_inp_dly [get_ports {D39}]
+
 #**************************************************************
 # Set Output Delay
 #**************************************************************
@@ -226,6 +247,26 @@ set_output_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_out_dly [ge
 set_output_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_out_dly [get_ports SCL]
 set_output_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_out_dly [get_ports SDA]
 
+set_output_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_out_dly [get_ports {D0}]
+set_output_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_out_dly [get_ports {D1}]
+set_output_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_out_dly [get_ports {D22}]
+set_output_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_out_dly [get_ports {D23}]
+set_output_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_out_dly [get_ports {D24}]
+set_output_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_out_dly [get_ports {D25}]
+set_output_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_out_dly [get_ports {D26}]
+set_output_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_out_dly [get_ports {D27}]
+set_output_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_out_dly [get_ports {D28}]
+set_output_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_out_dly [get_ports {D29}]
+set_output_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_out_dly [get_ports {D30}]
+set_output_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_out_dly [get_ports {D31}]
+set_output_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_out_dly [get_ports {D32}]
+set_output_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_out_dly [get_ports {D33}]
+set_output_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_out_dly [get_ports {D34}]
+set_output_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_out_dly [get_ports {D35}]
+set_output_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_out_dly [get_ports {D36}]
+set_output_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_out_dly [get_ports {D37}]
+set_output_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_out_dly [get_ports {D38}]
+set_output_delay -add_delay  -clock [get_clocks {clk_virtual}]  $dig_out_dly [get_ports {D39}]
 
 #**************************************************************
 # Set Clock Groups

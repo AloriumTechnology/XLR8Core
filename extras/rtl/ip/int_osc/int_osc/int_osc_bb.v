@@ -1,8 +1,8 @@
 
 module int_osc (
-	clkout,
-	oscena);	
+	oscena,
+	clkout);	
 
-	output		clkout;
 	input		oscena;
+	output		clkout;
 endmodule

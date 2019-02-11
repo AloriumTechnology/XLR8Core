@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------
- Copyright (c) 2016 Alorim Technology.  All right reserved.
+ Copyright (c) 2016 Alorium Technology.  All right reserved.
  The XLR8Core library provides a path
    to build FPGA images within the Arduino Framework. There
    isn't any C/C++ code associated with this library but

@@ -2,7 +2,7 @@ set_global_assignment -entity "int_osc" -library "int_osc" -name IP_TOOL_NAME "Q
 set_global_assignment -entity "int_osc" -library "int_osc" -name IP_TOOL_VERSION "17.1"
 set_global_assignment -entity "int_osc" -library "int_osc" -name IP_TOOL_ENV "Qsys"
 set_global_assignment -library "int_osc" -name SOPCINFO_FILE [file join $::quartus(qip_path) "../../int_osc.sopcinfo"]
-set_global_assignment -entity "int_osc" -library "int_osc" -name SLD_INFO "QSYS_NAME int_osc HAS_SOPCINFO 1 GENERATION_ID 1519606146"
+set_global_assignment -entity "int_osc" -library "int_osc" -name SLD_INFO "QSYS_NAME int_osc HAS_SOPCINFO 1 GENERATION_ID 1519246112"
 set_global_assignment -library "int_osc" -name MISC_FILE [file join $::quartus(qip_path) "../int_osc.cmp"]
 set_global_assignment -library "int_osc" -name SLD_FILE [file join $::quartus(qip_path) "int_osc.debuginfo"]
 set_global_assignment -entity "int_osc" -library "int_osc" -name IP_TARGETED_DEVICE_FAMILY "MAX 10"
@@ -15,7 +15,7 @@ set_global_assignment -entity "int_osc" -library "int_osc" -name IP_COMPONENT_DI
 set_global_assignment -entity "int_osc" -library "int_osc" -name IP_COMPONENT_REPORT_HIERARCHY "On"
 set_global_assignment -entity "int_osc" -library "int_osc" -name IP_COMPONENT_INTERNAL "Off"
 set_global_assignment -entity "int_osc" -library "int_osc" -name IP_COMPONENT_VERSION "MS4w"
-set_global_assignment -entity "int_osc" -library "int_osc" -name IP_COMPONENT_PARAMETER "QVVUT19HRU5FUkFUSU9OX0lE::MTUxOTYwNjE0Ng==::QXV0byBHRU5FUkFUSU9OX0lE"
+set_global_assignment -entity "int_osc" -library "int_osc" -name IP_COMPONENT_PARAMETER "QVVUT19HRU5FUkFUSU9OX0lE::MTUxOTI0NjExMg==::QXV0byBHRU5FUkFUSU9OX0lE"
 set_global_assignment -entity "int_osc" -library "int_osc" -name IP_COMPONENT_PARAMETER "QVVUT19ERVZJQ0VfRkFNSUxZ::TUFYIDEw::QXV0byBERVZJQ0VfRkFNSUxZ"
 set_global_assignment -entity "int_osc" -library "int_osc" -name IP_COMPONENT_PARAMETER "QVVUT19ERVZJQ0U=::MTBNMDhTQVUxNjlDOEc=::QXV0byBERVZJQ0U="
 set_global_assignment -entity "int_osc" -library "int_osc" -name IP_COMPONENT_PARAMETER "QVVUT19ERVZJQ0VfU1BFRURHUkFERQ==::OA==::QXV0byBERVZJQ0VfU1BFRURHUkFERQ=="

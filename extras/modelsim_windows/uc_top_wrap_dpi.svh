@@ -20,6 +20,7 @@ typedef struct {
 
   byte     unsigned  nrst;
   byte     unsigned  clk;
+  int      unsigned  param_app_xb0_enable;
   byte     unsigned  en16mhz;
   byte     unsigned  en128khz;
   byte     unsigned  clk_adcref;
@@ -41,12 +42,12 @@ typedef struct {
   byte     unsigned  sdain;
   byte     unsigned  sclin;
   int      unsigned  pcint_rcv;
+  byte     unsigned  xlr8_irq;
   shortint unsigned  pm_rd_data;
   shortint unsigned  pm_core_rd_data;
   byte     unsigned  dm_din;
   byte     unsigned  stgi_xf_io_slv_dbusout;
   byte     unsigned  stgi_xf_io_slv_out_en;
-  int      unsigned  xb_info;
 
 } uc_wrap_inputs_sv_t;
 
@@ -90,6 +91,7 @@ typedef struct {
   int      unsigned  pcmsk;
   byte     unsigned  pcie;
   byte     unsigned  eimsk;
+  byte     unsigned  xlr8_irq_ack;
   byte     unsigned  pm_ce;
   byte     unsigned  pm_wr;
   shortint unsigned  pm_wr_data;
@@ -99,6 +101,7 @@ typedef struct {
   byte     unsigned  dm_dout;
   byte     unsigned  dm_ce;
   byte     unsigned  dm_we;
+  byte     unsigned  dm_dout_rg;
   byte     unsigned  core_ramadr_lo8;
   byte     unsigned  core_ramre;
   byte     unsigned  core_ramwe;

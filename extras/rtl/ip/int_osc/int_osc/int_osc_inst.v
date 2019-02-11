@@ -1,5 +1,5 @@
 	int_osc u0 (
-		.clkout (<connected-to-clkout>), // clkout.clk
-		.oscena (<connected-to-oscena>)  // oscena.oscena
+		.oscena (<connected-to-oscena>), // oscena.oscena
+		.clkout (<connected-to-clkout>)  // clkout.clk
 	);
 

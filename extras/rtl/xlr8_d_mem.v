@@ -26,14 +26,21 @@ module xlr8_d_mem(
    output [7:0]           dout;
    input                  we;
    
-   localparam             c_adr_width = (dm_size < 2)    ? 0 + 10 :
-                                        (dm_size < 4)    ? 1 + 10 :  
-                                        (dm_size < 8)    ? 2 + 10 :  
-                                        (dm_size < 16)   ? 3 + 10 :  
-                                        (dm_size < 32)   ? 4 + 10 :  
-                                        (dm_size < 64)   ? 5 + 10 :  
-                                        (dm_size == 64)  ? 6 + 10 : 0;  
+//   localparam             c_adr_width = (dm_size < 2)    ? 0 + 10 :
+//                                        (dm_size < 4)    ? 1 + 10 :  
+//                                        (dm_size < 8)    ? 2 + 10 :  
+//                                        (dm_size < 16)   ? 3 + 10 :  
+//                                        (dm_size < 32)   ? 4 + 10 :  
+//                                        (dm_size < 64)   ? 5 + 10 :  
+//                                        (dm_size == 64)  ? 6 + 10 : 0;  
 
+   localparam             c_adr_width = (dm_size <=  1) ? 0 + 10 :
+                                        (dm_size <=  2) ? 1 + 10 :  
+                                        (dm_size <=  4) ? 2 + 10 :  
+                                        (dm_size <=  8) ? 3 + 10 :  
+                                        (dm_size <= 16) ? 4 + 10 :  
+                                        (dm_size <= 32) ? 5 + 10 :  
+                                        (dm_size <= 64) ? 6 + 10 : 0;  
    
    wire [c_adr_width-1:0] addr_tmp;
    
@@ -95,7 +102,7 @@ module xlr8_d_mem(
 `endif
    
   wire _unused_ok = &{1'b0,
-                      address[15:c_adr_width],
+                      address[15:c_adr_width-1],
                       ce,  // currently unused, perhaps hook up later for power savings?
                       1'b0};
 
