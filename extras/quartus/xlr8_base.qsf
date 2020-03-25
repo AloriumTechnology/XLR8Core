@@ -6,7 +6,27 @@
 # Author     : Steve Phillips
 # Contact    : support@aloriumtech.com
 # Description:
+#    This file is used by all Openxlr8 builds. Its is called from the
+#   [board]_[clock].qsf file in the XLR8Build quartus directory. It
+#   pulls in some verilog files used in all builds and then call the
+#   openxlr8 qsf files.
 #
+
+# The following list shows the settings files in the order they are
+# read. Indentation indicates which files are sources by parent
+# files. The [board]_[clock].qsf file is called automatically based on
+# the design revision selected in Quartus. Use the menu item
+# Project->Revisions to selct a revision.
+#
+# +- XLR8Build/extras/quartus/[board]_[clock].qsf
+#    +- XLR8Core/extras/quartus/[board]_top_core.qsf
+#    |  +- XLR8Core/extras/quartus/xlr8_top_core.tcl
+#    |  +- XLR8Core/extras/quartus/xlr8_top.sdc
+#    +- XLR8Core/extras/quartus/xlr8_base.qsf
+#       +- XLR8Build/extras/quartus/openxlr8.qsf
+#       +- XLR8Build/extras/quartus/openxlr8_builtin.qsf
+
+
 # Quartus settings for XLR8 project
 #  http://www.aloriumtech.com/xlr8
 #  https://github.com/AloriumTechnology
@@ -20,22 +40,7 @@ set_global_assignment -name SYSTEMVERILOG_FILE ../../../XLR8Build/extras/rtl/pll
 set_global_assignment -name TOP_LEVEL_ENTITY xlr8_alorium_top
 # SDC file now read in by the BRD_top_core.qsf file
 #set_global_assignment -name SDC_FILE ../../../XLR8Core/extras/quartus/xlr8_top.sdc
-# Built-in XBs
-# Float
-set_global_assignment -name SEARCH_PATH ../../../XLR8Float/extras/rtl/xlr8_float
-set_global_assignment -name SEARCH_PATH ../../../XLR8Float/extras/rtl/xlr8_float/xlr8_float_add1
-set_global_assignment -name SEARCH_PATH ../../../XLR8Float/extras/rtl/xlr8_float/xlr8_float_mult2
-set_global_assignment -name VHDL_FILE   ../../../XLR8Float/extras/rtl/xlr8_float/xlr8_float_add1/dspba_library_package.vhd
-set_global_assignment -name VHDL_FILE   ../../../XLR8Float/extras/rtl/xlr8_float/xlr8_float_add1/dspba_library.vhd
-# Servo
-set_global_assignment -name VERILOG_FILE ../../../XLR8Servo/extras/rtl/xlr8_servo.v
-# Neopixel
-set_global_assignment -name VERILOG_FILE ../../../XLR8NeoPixel/extras/rtl/xlr8_neopixel.v
-set_global_assignment -name SEARCH_PATH  ../../../XLR8NeoPixel/extras/rtl/ram2p1024x36
-# Quad
-set_global_assignment -name VERILOG_FILE ../../../XLR8Quadrature/extras/rtl/xlr8_quadrature.v
-# PID
-set_global_assignment -name VERILOG_FILE ../../../XLR8PID/extras/rtl/xlr8_pid.v
+
 
 #------------------------------------------------------------------------------
 # Load settings file specific to this OpenXLR8 module

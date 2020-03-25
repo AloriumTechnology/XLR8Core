@@ -16,6 +16,7 @@ set_global_assignment -name QIP_FILE $COREDIR/rtl/ip/int_osc/int_osc/synthesis/i
 set_global_assignment -name SIP_FILE $COREDIR/rtl/ip/int_osc/int_osc/simulation/int_osc.sip
 set_global_assignment -name QIP_FILE $COREDIR/rtl/ip/pll16/pll16.qip
 set_global_assignment -name QIP_FILE $COREDIR/rtl/ip/ram2p16384x16/ram2p16384x16.qip
+set_global_assignment -name QIP_FILE $COREDIR/rtl/ip/ram2p32768x16/ram2p32768x16.qip
 set_global_assignment -name SDC_FILE $COREDIR/quartus/altera_modular_adc_control.sdc
 set_global_assignment -name SDC_FILE $COREDIR/quartus/altera_onchip_flash.sdc
 # End of xlr8_top_core.tcl

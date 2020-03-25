@@ -33,7 +33,11 @@
  `ifdef HINJ_BOARD
   `include "hinj_adr_pack.vh"
  `else
-  `define XLR8_BOARD
+  `ifdef BTBEE_BOARD
+   `include "btbee_adr_pack.vh"
+  `else
+   `define XLR8_BOARD
+  `endif
  `endif
 `endif
 
@@ -41,16 +45,18 @@ module xlr8_alorium_top
   #(
     parameter DESIGN_CONFIG = 520,
     //    {
-    //     10'd0, // [31:22] - reserved
-    //     8'h2,  // [21:14] - reserved for DMEM size
-    //     8'h8,  // [13:6]  - MAX10 Size,  ex: 0x8 = M08, 0x32 = M50
-    //     1'b0,  //   [5]   - ADC_SWIZZLE, 0 = XLR8,            1 = Sno
-    //     1'b0,  //   [4]   - PLL Speed,   0 = 16MHz PLL,       1 = 50Mhz PLL
-    //     1'b1,  //   [3]   - PMEM Size,   0 = 8K (Sim Kludge), 1 = 16K
-    //     2'd0,  //  [2:1]  - Clock Speed, 0 = 16MHZ,           1 = 32MHz, 2 = 64MHz, 3=na
-    //     1'b0   //   [0]   - FPGA Image,  0 = CFM Application, 1 = CFM Factory
+    //     10'd0, // [31:15] - reserved
+    //     8'h2,  //  [14]   - Compact,        0 = Analog/Flash,    1 = Compact
+    //     8'h8,  // [13:6]  - MAX10 Size,     ex: 0x8 = M08, 0x32 = M50
+    //     1'b0,  //   [5]   - ADC_SWIZZLE,    0 = XLR8,            1 = Sno
+    //     1'b0,  //   [4]   - PLL Speed,      0 = 16MHz PLL,       1 = 50Mhz PLL
+    //     1'b1,  //   [3]   - Force 16K PMEM, 0 = FPGA Dependent,  1 = 16K
+    //     2'd0,  //  [2:1]  - Clock Speed,    0 = 16MHZ,           1 = 32MHz, 2 = 64MHz, 3=na
+    //     1'b0   //   [0]   - FPGA Image,     0 = CFM Application, 1 = CFM Factory            
     //     },
 
+    // If we want to use 8K PMEM for simulation, set this
+    parameter PMEM_8K         = 0,  // Set to 1 for 8K PMEM, 0 will use 16 or 32
     // Specify the size of the DMEM
     parameter DMEM_SIZE       = 2,  // DMem Size, in KB, Valid range is 2 thru 64,
     
@@ -67,6 +73,9 @@ module xlr8_alorium_top
 `ifdef HINJ_BOARD
     // Include Hinj I/O definitions from another file
  `include "xlr8_alorium_top_io_hinj.vh"
+`elsif BTBEE_BOARD
+    // Include Btbee I/O definitions from another file
+ `include "xlr8_alorium_top_io_btbee.vh"
 `elsif DE10LITE_BOARD
     // Include DE10-Lite I/O definitions from another file
  `include "xlr8_alorium_top_io_de10lite.vh"
@@ -119,17 +128,36 @@ module xlr8_alorium_top
     );
 
    // FIXME: Eliminate any of these that aren't used
-   localparam pm_size             = `c_pm_size;
+   // Select relevant fields from the DESIGN_CONFIG parameter
+   localparam DESIGN_CONFIG_FPGA_SIZE = DESIGN_CONFIG[13:6];
+   // If DESIGN_CONFIG[3] == 1, then force a 16K PMEM size, otherwise, allow 32K PMEM 
+   // for larger MAX10 devices
+   localparam PM_SIZE  = (DESIGN_CONFIG[3] == 1'b1) ?  `c_pm_size :
+                         (DESIGN_CONFIG_FPGA_SIZE == 8'h32) ? (`c_pm_size << 1) :      // M50  
+                         (DESIGN_CONFIG_FPGA_SIZE == 8'h28) ? (`c_pm_size << 1) :      // M40 
+                         (DESIGN_CONFIG_FPGA_SIZE == 8'h19) ? `c_pm_size :             // M25
+                         (DESIGN_CONFIG_FPGA_SIZE == 8'h10) ? `c_pm_size :             // M16
+                         (DESIGN_CONFIG_FPGA_SIZE == 8'h08) ? `c_pm_size : `c_pm_size; // M08
+   localparam PM_REAL_SIZE        = PMEM_8K ? 8 : PM_SIZE;
    localparam DM_SIZE             = (DMEM_SIZE <= 2) ? 2 : DMEM_SIZE;
-   localparam PM_REAL_SIZE        = DESIGN_CONFIG[3] ? pm_size : 8;
    localparam dm_int_sram_read_ws = `c_dm_int_sram_read_ws;
-   localparam UFM_ADR_WIDTH = 13; // (For 32KB pmem = 16KInstructions = 8K 32-bit accesses = 13 bit address)
+//   localparam UFM_ADR_WIDTH = 13; // (For 32KB pmem = 16KInstructions = 8K 32-bit accesses = 13 bit address)
+   // If DESIGN_CONFIG[3] == 1, then force a 16K PMEM size, otherwise, allow 32K PMEM 
+   // for larger MAX10 devices
+   localparam UFM_ADR_WIDTH = (DESIGN_CONFIG[3] == 1'b1) ?  13 :
+                              (DESIGN_CONFIG_FPGA_SIZE == 8'h32) ? 14 :     // M50  
+                              (DESIGN_CONFIG_FPGA_SIZE == 8'h28) ? 14 :     // M40 
+                              (DESIGN_CONFIG_FPGA_SIZE == 8'h19) ? 13 :     // M25
+                              (DESIGN_CONFIG_FPGA_SIZE == 8'h10) ? 13 :     // M16
+                              (DESIGN_CONFIG_FPGA_SIZE == 8'h08) ? 13 : 13; // M08
    localparam UFM_BC_WIDTH = 4;
    localparam NUM_UNO_PINS   = 20; // A[5:0] and D[13:0]
 `ifdef HINJ_BOARD
    localparam NUM_PINS   = 122; // A[5:0],D[13:0] and Hinj Specific GPIO
 `elsif SNO_BOARD
    localparam NUM_PINS   = 38; // A[5:0],D[13:0] and D[39:22]
+`elsif BTBEE_BOARD
+   localparam NUM_PINS   = 52; // A[5:0],D[13:0] and Btbee Specific GPIO
 `else
    localparam NUM_PINS   = 20; // A[5:0] and D[13:0]
 `endif   
@@ -319,6 +347,13 @@ module xlr8_alorium_top
    wire                        pport_a_io_slv_out_en;
    wire                        pport_e_io_slv_out_en;
    wire                        pport_g_io_slv_out_en;
+`endif
+`ifdef BTBEE_BOARD
+   wire [7:0]                  btbee_gpio_io_slv_dbusout;
+   wire                        btbee_gpio_io_slv_out_en;
+   wire [7:0]                  btbee_pcint_io_slv_dbusout;
+   wire                        btbee_pcint_io_slv_out_en;
+   logic [3:0]                 btbee_gpio_pcint;
 `endif
    wire [7:0]                  stgi_xf_io_slv_dbusout;
    wire                        stgi_xf_io_slv_out_en;
@@ -630,7 +665,11 @@ module xlr8_alorium_top
    //----------------------------------------------------------------------
    // program memory
 
-   xlr8_p_mem #(.pm_size(pm_size))
+   xlr8_p_mem 
+     #(
+       .PM_SIZE      (PM_SIZE),
+       .PM_REAL_SIZE (PM_REAL_SIZE)
+       )
    p_mem_inst
      (
       .clk     (clk_cpu),
@@ -782,6 +821,10 @@ module xlr8_alorium_top
                                    xb_openxlr8_out_en        ? xb_openxlr8_dbusout        :
                                    xlr8_clocks_out_en        ? xlr8_clocks_dbusout        :
                                    xlr8_irq_io_slv_out_en    ? xlr8_irq_io_slv_dbusout    :
+`ifdef BTBEE_BOARD
+                                   btbee_gpio_io_slv_out_en  ? btbee_gpio_io_slv_dbusout  :
+                                   btbee_pcint_io_slv_out_en ? btbee_pcint_io_slv_dbusout :
+`endif
 `ifdef HINJ_BOARD
                                    hinj_gpio_io_slv_out_en   ? hinj_gpio_io_slv_dbusout   :
                                    hinj_bixb_io_slv_out_en   ? hinj_bixb_io_slv_dbusout   :
@@ -802,10 +845,14 @@ module xlr8_alorium_top
                                    xb_openxlr8_out_en        ||
                                    xlr8_clocks_out_en        || 
                                    xlr8_irq_io_slv_out_en    || 
+`ifdef BTBEE_BOARD
+                                   btbee_gpio_io_slv_out_en  ||
+                                   btbee_pcint_io_slv_out_en ||
+`endif
 `ifdef HINJ_BOARD
                                    hinj_gpio_io_slv_out_en   ||
                                    hinj_bixb_io_slv_out_en   ||
-                                   hinj_pcint_io_slv_out_en   ||
+                                   hinj_pcint_io_slv_out_en  ||
 `endif
 `ifdef SNO_BOARD
                                    pport_a_io_slv_out_en     || 
@@ -1306,6 +1353,108 @@ module xlr8_alorium_top
 `endif
    
    // ======================= END of Extra Hinj Board Ports ======================
+   
+   // ======================= START of Extra Btbee Board Ports ======================
+`ifdef BTBEE_BOARD
+   //----------------------------------------------------------------------
+   // Instance Name:  btbee_gpio_inst
+   // Module Type:    xlr8_btbee_gpio
+   //
+   //----------------------------------------------------------------------
+   xlr8_btbee_gpio 
+     #(
+       .NUM_PINS       (NUM_PINS),
+       .NUM_UNO_PINS   (NUM_UNO_PINS),
+       .PORTXTOP1_Address (PORTXTOP1_Address),
+       .DDRXTOP1_Address  (DDRXTOP1_Address),
+       .PINXTOP1_Address  (PINXTOP1_Address),
+       .PORTXTOP0_Address (PORTXTOP0_Address),
+       .DDRXTOP0_Address  (DDRXTOP0_Address),
+       .PINXTOP0_Address  (PINXTOP0_Address),
+       .PORTXBOT1_Address (PORTXBOT1_Address),
+       .DDRXBOT1_Address  (DDRXBOT1_Address),
+       .PINXBOT1_Address  (PINXBOT1_Address),
+       .PORTXBOT0_Address (PORTXBOT0_Address),
+       .DDRXBOT0_Address  (DDRXBOT0_Address),
+       .PINXBOT0_Address  (PINXBOT0_Address)
+       )
+   btbee_gpio_inst 
+     (
+      // Clock and Reset
+      .rstn        (core_rstn),
+      .clk         (clk_io),
+      // I/O
+      .adr         (io_arb_mux_adr),
+      .dbus_in     (io_arb_mux_dbusout),
+      .dbus_out    (btbee_gpio_io_slv_dbusout),
+      .iore        (io_arb_mux_iore),
+      .iowe        (io_arb_mux_iowe),
+      .io_out_en   (btbee_gpio_io_slv_out_en),
+      // DM
+      .ramadr      (core_ramadr_lo8[7:0]),
+      .ramre       (core_ramre),
+      .ramwe       (core_ramwe),
+      .dm_sel      (core_dm_sel),
+      .xb_ddoe     (xb_ddoe[NUM_PINS-1:NUM_UNO_PINS]),
+      .xb_ddov     (xb_ddov[NUM_PINS-1:NUM_UNO_PINS]),
+      .xb_pvoe     (xb_pvoe[NUM_PINS-1:NUM_UNO_PINS]),
+      .xb_pvov     (xb_pvov[NUM_PINS-1:NUM_UNO_PINS]),
+      // Outputs
+      .port_pads   ({
+                     // Port XTOP1[7:0]
+                     xbee_t20_d00,xbee_t19_d01,xbee_t18_d02,xbee_t17_d03,
+                     xbee_t16_d06,xbee_t15_d05,xbee_t13_slp,xbee_t12_d07,
+                     // Port XTOP0[7:0]
+                     xbee_t11_d04,xbee_t09_d08,xbee_t07_d11,xbee_t06_d10, 
+                     xbee_t05_resetn,xbee_t04_d12,xbee_t03_din,xbee_t02_dout,
+                     // Port XBOT1[7:0]
+                     xbee_b20_d00,xbee_b19_d01,xbee_b18_d02,xbee_b17_d03, 
+                     xbee_b16_d06,xbee_b15_d05,xbee_b13_slp,xbee_b12_d07,
+                     // Port XBOT0[7:0]
+                     xbee_b11_d04,xbee_b09_d08,xbee_b07_d11,xbee_b06_d10, 
+                     xbee_b05_resetn,xbee_b04_d12,xbee_b03_din,xbee_b02_dout
+                     }),
+      .xb_pinx     (xb_pinx[NUM_PINS-1:NUM_UNO_PINS]),
+      .pcint       (btbee_gpio_pcint) // Hinj GPIO Pin Change Interrupts to btbee_pcint
+      );
+
+   //----------------------------------------------------------------------
+   // Instance Name:  btbee_pcint_inst
+   // Module Type:    xlr8_pcint
+   //
+   //----------------------------------------------------------------------
+   xlr8_pcint
+     #(
+       .XICR_Address (BPCICR_Address),
+       .XIFR_Address (BPCIFR_Address),
+       .XMSK_Address (BPCIMSK_Address),
+       .WIDTH        (4)
+       )
+   btbee_pcint_inst
+     (
+      // Clock and Reset
+      .rstn         (core_rstn),
+      .clk          (clk_io),
+      // I/O
+      .adr          (io_arb_mux_adr),
+      .dbus_in      (io_arb_mux_dbusout),
+      .dbus_out     (btbee_pcint_io_slv_dbusout),
+      .iore         (io_arb_mux_iore),
+      .iowe         (io_arb_mux_iowe),
+      .out_en       (btbee_pcint_io_slv_out_en),
+      // DM
+      .ramadr       (core_ramadr_lo8[7:0]),
+      .ramre        (core_ramre),
+      .ramwe        (core_ramwe),
+      .dm_sel       (core_dm_sel),
+      // 
+      .x_int_in     (btbee_gpio_pcint),
+      .x_irq        (xlr8_bi_irq),
+      .x_irq_ack    (4'h0) // Don't use acks here
+      );
+`endif
+   
+   // ======================= END of Extra Btbee Board Ports ======================
    
    
    generate

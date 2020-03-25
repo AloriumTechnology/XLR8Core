@@ -11,12 +11,12 @@ module xlr8_p_mem
   (input logic        clk,
    input logic         rst_flash_n,
 
-   input logic [15:0]  pm_core_rd_addr,
+   input logic [16:0]  pm_core_rd_addr,
    output logic [15:0] pm_core_rd_data,
    input logic         pm_ce,
    input logic         pm_wr,
    input logic [15:0]  pm_wr_data,
-   input logic [15:0]  pm_addr,
+   input logic [16:0]  pm_addr,
    output logic [15:0] pm_rd_data
 
    );
@@ -33,22 +33,22 @@ module xlr8_p_mem
   //        **4K..(8K-257): Application memory.  Application must be less than 12K-256 bytes.  There is no protection for this!
   //        **8K-256..8K-1: boot code (optiboot).
   // half-uno: 8K instruction memory
-  parameter pm_size = 16;          // PM size 1..64 KWords
-  parameter PM_REAL_SIZE = pm_size;
+  parameter PM_SIZE = 16;          // PM size 1..64 KWords
+  parameter PM_REAL_SIZE = PM_SIZE;
   localparam PM_DEPTH = PM_REAL_SIZE * 1024;
   localparam PM_ADDR_W = $clog2(PM_DEPTH);
-  localparam  C_ADR_WIDTH = (pm_size < 2)    ? 0 + 10 :
-                            (pm_size < 4)    ? 1 + 10 :
-                            (pm_size < 8)    ? 2 + 10 :
-                            (pm_size < 16)   ? 3 + 10 :
-                            (pm_size < 32)   ? 4 + 10 :
-                            (pm_size < 64)   ? 5 + 10 :
-                            (pm_size < 128)  ? 6 + 10 :
-                            (pm_size == 128) ? 7 + 10 : 0;
+  localparam  C_ADR_WIDTH = (PM_SIZE < 2)    ? 0 + 10 :
+                            (PM_SIZE < 4)    ? 1 + 10 :
+                            (PM_SIZE < 8)    ? 2 + 10 :
+                            (PM_SIZE < 16)   ? 3 + 10 :
+                            (PM_SIZE < 32)   ? 4 + 10 : // 16K word pmem needs 14 address bits
+                            (PM_SIZE < 64)   ? 5 + 10 : // 32K word pmem needs 15 address bits
+                            (PM_SIZE < 128)  ? 6 + 10 :
+                            (PM_SIZE == 128) ? 7 + 10 : 0;
   
   
   wire                 _unused_ok = &{1'b0,
-                                      pm_addr[15:C_ADR_WIDTH],
+                                      pm_addr[16:C_ADR_WIDTH],
                                       1'b0};
 
 
@@ -63,8 +63,8 @@ module xlr8_p_mem
 
 
   //condition two read addresses for debug mode
-  logic [15:0]         core_rd_addr;
-  logic [15:0]         rw_addr;
+  logic [16:0]         core_rd_addr;
+  logic [16:0]         rw_addr;
   always_comb begin
     core_rd_addr = pm_core_rd_addr; // defaults
     rw_addr = pm_addr;            // defaults
@@ -97,8 +97,8 @@ module xlr8_p_mem
 
 `else // !`ifdef P_MEM_SIM_MODEL
   generate
-    if (PM_REAL_SIZE == 16) begin: ram16k
-      ram2p16384x16   ram2p16384x16_inst 
+    if (PM_REAL_SIZE == 32) begin: ram32k
+      ram2p32768x16   ram2p32768x16_inst 
         (
          .address_a ( pm_addr[C_ADR_WIDTH-1:0] ),
          .address_b ( pm_core_rd_addr[C_ADR_WIDTH-1:0] ),
@@ -110,21 +110,37 @@ module xlr8_p_mem
          .q_a ( pm_rd_data ),
          .q_b ( pm_core_rd_data )
          );
-    end: ram16k
-    else begin: ram8k
-      ram2p8192x16   ram2p8192x16_inst 
-        (
-         .address_a ( rw_addr[PM_ADDR_W-1:0] ),
-         .address_b ( core_rd_addr[PM_ADDR_W-1:0] ),
-         .clock ( clk ),
-         .data_a ( pm_wr_data ),
-         .data_b ( '0),             // unuaws
-         .wren_a ( pm_wr ),
-         .wren_b ( 1'b0 ),       // unused
-         .q_a ( pm_rd_data ),
-         .q_b ( pm_core_rd_data )
-         );  
-    end: ram8k
+    end: ram32k
+    else begin: notram32k
+       if (PM_REAL_SIZE == 16) begin: ram16k
+          ram2p16384x16   ram2p16384x16_inst 
+            (
+             .address_a ( pm_addr[C_ADR_WIDTH-1:0] ),
+             .address_b ( pm_core_rd_addr[C_ADR_WIDTH-1:0] ),
+             .clock ( clk ),
+             .data_a ( pm_wr_data ),
+             .data_b ( '0),             // unuaws
+             .wren_a ( pm_wr ),
+             .wren_b ( 1'b0 ),       // unused
+             .q_a ( pm_rd_data ),
+             .q_b ( pm_core_rd_data )
+             );
+       end: ram16k
+       else begin: ram8k
+          ram2p8192x16   ram2p8192x16_inst 
+            (
+             .address_a ( rw_addr[PM_ADDR_W-1:0] ),
+             .address_b ( core_rd_addr[PM_ADDR_W-1:0] ),
+             .clock ( clk ),
+             .data_a ( pm_wr_data ),
+             .data_b ( '0),             // unuaws
+             .wren_a ( pm_wr ),
+             .wren_b ( 1'b0 ),       // unused
+             .q_a ( pm_rd_data ),
+             .q_b ( pm_core_rd_data )
+             );  
+       end: ram8k
+    end: notram32k
   endgenerate
 `endif // !`ifdef P_MEM_SIM_MODEL
   
@@ -150,7 +166,7 @@ module xlr8_p_mem
    ovl_range #(.msg ("ERROR: Program Memory address out of range"),
                .width(16),
                .min(0),
-               .max(pm_size * 1024 - 1), // haven't check this value yet
+               .max(PM_SIZE * 1024 - 1), // haven't check this value yet
                .coverage_level (4'b1111),
                .reset_polarity (1'b1))
      wgm1_value (.clock      (clk),
@@ -161,7 +177,7 @@ module xlr8_p_mem
   ovl_range #(.msg ("ERROR: Program Memory address out of range"),
                .width(16),
                .min(0),
-               .max(pm_size * 1024 - 1 + 1), // haven't check this value yet
+               .max(PM_SIZE * 1024 - 1 + 1), // haven't check this value yet
                .coverage_level (4'b1111),
                .reset_polarity (1'b1))
      wgm2_instr_fetch (.clock      (clk),

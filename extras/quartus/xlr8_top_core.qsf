@@ -37,6 +37,12 @@ set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -rise
 set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -fall
 set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -rise
 set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -fall
+
+# NOTE: If having problems with synthesis/fitting, try a different SEED value by
+#       changing the following SEED value
+#set_global_assignment -name SEED 44
+
+
 set_location_assignment PIN_A4 -to A5
 set_location_assignment PIN_B3 -to A4
 set_location_assignment PIN_B6 -to A3

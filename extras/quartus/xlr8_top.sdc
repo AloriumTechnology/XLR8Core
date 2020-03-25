@@ -312,5 +312,5 @@ set_max_delay -from [get_ports {D10}] -to [get_ports {D12}] [expr $dig10_inp_dly
 #**************************************************************
 # Read OpenXLR8 XB Specific Constraints 
 #**************************************************************
-read_sdc ../../../XLR8Build/extras/quartus/xlr8_top.sdc
+read_sdc ../../../XLR8Build/extras/quartus/openxlr8.sdc
 
