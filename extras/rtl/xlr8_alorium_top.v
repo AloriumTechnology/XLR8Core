@@ -383,6 +383,12 @@ module xlr8_alorium_top
    logic [NUM_XBS-1:0][NUM_PINS-1:0] xbs_ddov; // data direction value if overridden (1=out)
    logic [NUM_XBS-1:0][NUM_PINS-1:0] xbs_pvoe; // override output value
    logic [NUM_XBS-1:0][NUM_PINS-1:0] xbs_pvov; // output value if overridden
+`ifdef COPPER
+   logic                             core_irqlines_22;
+   logic                             avr_interconnect_ind_irq_ack_22;
+   logic [7:1]                       trigger_sources;
+`endif      
+
 
    //----------------------------------------------------------------------
    // Instance Name:  clocks_inst
@@ -733,8 +739,6 @@ module xlr8_alorium_top
       .portc_ddrx           (portc_ddrx[5:0]),
       .portd_portx          (portd_portx[7:0]),
       .portd_ddrx           (portd_ddrx[7:0]),
-      .ADCD                 (ADCD[5:0]),
-      .ANA_UP               (ANA_UP),
       .OC0A_pin             (OC0A_pin),
       .OC0B_pin             (OC0B_pin),
       .OC1A_pin             (OC1A_pin),
@@ -786,8 +790,6 @@ module xlr8_alorium_top
       // Inputs
       .en16mhz              (en16mhz),
       .en128khz             (en128khz),
-      .clk_adcref           (clk_adcref),
-      .locked_adcref        (locked_adcref),
       .pwr_on_nrst          (pwr_on_nrst),
       .portb_pinx           (portb_pinx[5:0]),
       .portc_pinx           (portc_pinx[5:0]),
@@ -804,6 +806,16 @@ module xlr8_alorium_top
       .pm_rd_data           (pm_rd_data[15:0]),
       .pm_core_rd_data      (pm_core_rd_data[15:0]),
       .dm_din               (dm_din[7:0]),
+`ifdef COPPER
+      .core_irqlines_22     (core_irqlines_22),
+      .avr_interconnect_ind_irq_ack_22 (avr_interconnect_ind_irq_ack_22),
+      .trigger_sources      (trigger_sources[7:2]),
+`else // if !COPPER
+      .clk_adcref           (clk_adcref),
+      .locked_adcref        (locked_adcref),
+      .ANA_UP               (ANA_UP),
+      .ADCD                 (ADCD[5:0]),
+`endif      
       .stgi_xf_io_slv_dbusout(stgi_xf_io_slv_dbusout[7:0]),
       //sjp// Change the following lines becuase I'm trying to pass APP0 as parameter
       //sjp//                          .stgi_xf_io_slv_out_en(stgi_xf_io_slv_out_en),
@@ -1803,6 +1815,15 @@ module xlr8_alorium_top
       .xb_ddov            (xb_openxlr8_ddov),
       .xb_pvoe            (xb_openxlr8_pvoe),
       .xb_pvov            (xb_openxlr8_pvov),
+`ifdef COPPER
+      .core_irqlines_22     (core_irqlines_22),
+      .avr_interconnect_ind_irq_ack_22 (avr_interconnect_ind_irq_ack_22),
+      .clk_adcref           (clk_adcref),
+      .locked_adcref        (locked_adcref),
+      .ANA_UP               (ANA_UP),
+      .ADCD                 (ADCD),
+      .trigger_sources      (trigger_sources),
+`endif      
       // Interrupts
       .xb_irq             (xb_openxlr8_irq)
       );
