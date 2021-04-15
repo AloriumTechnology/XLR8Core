@@ -105,6 +105,8 @@ set_location_assignment PIN_J6 -to D36
 set_location_assignment PIN_N6 -to D37
 set_location_assignment PIN_M5 -to D38
 set_location_assignment PIN_N7 -to D39
+set_location_assignment PIN_A3 -to D40
+set_location_assignment PIN_E10 -to D41
 
 set_global_assignment -name POWER_USE_PVA OFF
 
@@ -177,6 +179,6 @@ set_global_assignment -name SDC_FILE ../../../XLR8Core/extras/quartus/sno_top.sd
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 
 # Set value for number of pins on board. Use XLR8 = 20, Sno = 38, Hinj = 122
-set_parameter -name NUM_PINS 38
+set_parameter -name NUM_PINS 40
 
 # End of xlr8_top_core.qsf

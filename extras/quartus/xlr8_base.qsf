@@ -36,6 +36,7 @@
 set_global_assignment -name SEARCH_PATH ../../../XLR8Core/extras/rtl
 set_global_assignment -name SYSTEMVERILOG_FILE ../../../XLR8Core/extras/rtl/xlr8_alorium_top.v
 set_global_assignment -name SYSTEMVERILOG_FILE ../../../XLR8Build/extras/rtl/openxlr8.v
+set_global_assignment -name SYSTEMVERILOG_FILE ../../../XLR8Build/extras/rtl/xb_info.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../../XLR8Build/extras/rtl/pll16.vh
 set_global_assignment -name TOP_LEVEL_ENTITY xlr8_alorium_top
 # SDC file now read in by the BRD_top_core.qsf file

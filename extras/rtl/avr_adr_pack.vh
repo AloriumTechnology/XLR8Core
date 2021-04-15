@@ -284,7 +284,8 @@ localparam SVCR_ADDR          = 8'hFB; // XLR8 Servo XB Control Reg ------------
 localparam SVPWL_ADDR         = 8'hFC; // XLR8 Servo XB Pulse Width Low  Reg - ---------------------XLR8
 localparam SVPWH_ADDR         = 8'hFD; // XLR8 Servo XB Pulse Width High Reg -----------------------XLR8
 // localparam UNUSED          = 8'hFE; // --UNUSED--
-// localparam UNUSED          = 8'hFF; // --UNUSED--
+localparam XB_INFO_ADDR       = 8'hFF; // Default address for XB_INFO CSR
+
 
 /* These were incorporated into the unified list above. Could be deleted from here
 localparam STGI_XF_CTRL_ADR  = 6'h10;

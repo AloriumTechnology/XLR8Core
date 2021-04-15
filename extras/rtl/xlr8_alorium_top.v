@@ -26,18 +26,32 @@
 `include "synth_ctrl_pack.vh"
 `include "avr_adr_pack.vh"
 
+
 // Define XLR8_BOARD if no other board defined
 `ifdef SNO_BOARD
-`include "sno_adr_pack.vh"
+ `include "sno_adr_pack.vh"
 `else
- `ifdef HINJ_BOARD
-  `include "hinj_adr_pack.vh"
+ `ifdef SNOM2_BOARD
+  `include "snom2_adr_pack.vh"
  `else
-  `ifdef BTBEE_BOARD
-   `include "btbee_adr_pack.vh"
+  `ifdef HINJ_BOARD
+   `include "hinj_adr_pack.vh"
   `else
-   `define XLR8_BOARD
+   `ifdef BTBEE_BOARD
+    `include "btbee_adr_pack.vh"
+   `else
+    `define XLR8_BOARD
+   `endif
   `endif
+ `endif
+`endif 
+
+// Define SNO_OR_SNOM2_BOARD if either are defined
+`ifdef SNO_BOARD
+ `define SNO_OR_SNOM2_BOARD
+`else 
+ `ifdef SNOM2_BOARD
+  `define SNO_OR_SNOM2_BOARD
  `endif
 `endif
 
@@ -70,7 +84,10 @@ module xlr8_alorium_top
     parameter NUM_PIDS        = 6   // 4 wheels and a robotic arm
     )
    (
-`ifdef HINJ_BOARD
+`ifdef SNOM2_BOARD
+    // Include Sno M2 I/O definitions from another file
+ `include "xlr8_alorium_top_io_snom2.vh"
+`elsif HINJ_BOARD
     // Include Hinj I/O definitions from another file
  `include "xlr8_alorium_top_io_hinj.vh"
 `elsif BTBEE_BOARD
@@ -92,7 +109,7 @@ module xlr8_alorium_top
     inout       RX,TX,
     inout       D22,D23,D24,D25,D26,D27, // Port A
     inout       D28,D29,D30,D31,D32,D33, // Port E
-    inout       D34,D35,D36,D37,D38,D39, // Port G
+    inout       D34,D35,D36,D37,D38,D39,D40,D41, // Port G
  `else // XLR8 Board
     inout       D7,D6,D5,D4,D3,D2,TX,RX, // Port D
  `endif 
@@ -154,8 +171,12 @@ module xlr8_alorium_top
    localparam NUM_UNO_PINS   = 20; // A[5:0] and D[13:0]
 `ifdef HINJ_BOARD
    localparam NUM_PINS   = 122; // A[5:0],D[13:0] and Hinj Specific GPIO
+`elsif SNOM2_BOARD
+   localparam NUM_PINS   = 48; // A[5:0],D[13:0] and D[49:22]
+   localparam NUM_SNO_XPORTS = 4; // Number of "extra" ports
 `elsif SNO_BOARD
-   localparam NUM_PINS   = 38; // A[5:0],D[13:0] and D[39:22]
+   localparam NUM_PINS   = 40; // A[5:0],D[13:0] and D[41:22]
+   localparam NUM_SNO_XPORTS = 3; // Number of "extra" ports
 `elsif BTBEE_BOARD
    localparam NUM_PINS   = 52; // A[5:0],D[13:0] and Btbee Specific GPIO
 `else
@@ -250,22 +271,31 @@ module xlr8_alorium_top
    logic [7:0]             portd_ddrx;             // From uc_top_wrp_vlog_inst of `XLR8_AVR_CORE_MODULE_NAME.v
    logic [7:0]             portd_pinx;             // From iomux328_inst of xlr8_iomux328.v
    logic [7:0]             portd_portx;            // From uc_top_wrp_vlog_inst of `XLR8_AVR_CORE_MODULE_NAME.v
-`ifdef SNO_BOARD
-   logic [5:0]             porta_pads;
+   // Both the Sno and the Sno M2 have ports A, E, and G
+`ifdef SNO_OR_SNOM2_BOARD
+   logic [5:0]             porta_pads;  // Port A
    logic [5:0]             porta_ddrx;
    logic [5:0]             porta_pinx;
    logic [5:0]             porta_portx;
    logic                   porta_pcint;
-   logic [5:0]             porte_pads;
+   logic [5:0]             porte_pads;  // Port E
    logic [5:0]             porte_ddrx;
    logic [5:0]             porte_pinx;
    logic [5:0]             porte_portx;
    logic                   porte_pcint;
-   logic [5:0]             portg_pads;
-   logic [5:0]             portg_ddrx;
-   logic [5:0]             portg_pinx;
-   logic [5:0]             portg_portx;
+   logic [7:0]             portg_pads;  // Port G
+   logic [7:0]             portg_ddrx;
+   logic [7:0]             portg_pinx;
+   logic [7:0]             portg_portx;
    logic                   portg_pcint;
+`endif //  `ifdef SNO_OR_SNOM2_BOARD
+   // The Sno M2 also has port H
+`ifdef SNOM2_BOARD
+   logic [7:0]             porth_pads;  // Port H
+   logic [7:0]             porth_ddrx;
+   logic [7:0]             porth_pinx;
+   logic [7:0]             porth_portx;
+   logic                   porth_pcint;
 `endif
    logic                   pwr_on_nrst;            // From clocks_inst of xlr8_clocks.v
    logic                   rst_flash_n;            // From uc_top_wrp_vlog_inst of `XLR8_AVR_CORE_MODULE_NAME.v
@@ -340,7 +370,7 @@ module xlr8_alorium_top
    logic [7:0]                 hinj_bi_pinx;
    logic                       hinj_bixb_pcint;
 `endif
-`ifdef SNO_BOARD
+`ifdef SNO_OR_SNOM2_BOARD
    wire [7:0]                  pport_a_io_slv_dbusout;
    wire [7:0]                  pport_e_io_slv_dbusout;
    wire [7:0]                  pport_g_io_slv_dbusout;
@@ -348,6 +378,10 @@ module xlr8_alorium_top
    wire                        pport_e_io_slv_out_en;
    wire                        pport_g_io_slv_out_en;
 `endif
+`ifdef SNOM2_BOARD
+   wire [7:0]                  pport_h_io_slv_dbusout;
+   wire                        pport_h_io_slv_out_en;
+`endif   
 `ifdef BTBEE_BOARD
    wire [7:0]                  btbee_gpio_io_slv_dbusout;
    wire                        btbee_gpio_io_slv_out_en;
@@ -566,7 +600,7 @@ module xlr8_alorium_top
                                 .portc_pads     ({A5,A4,A3,A2,A1,A0}),
 `ifdef HINJ_BOARD
                                 .portd_pads     ({D7,D6,D5,D4,D3,D2,D1,D0}),
-`elsif SNO_BOARD
+`elsif SNO_OR_SNOM2_BOARD
                                 .portd_pads     ({D7,D6,D5,D4,D3,D2,D1,D0}),
                                 .TX             (TX),
                                 .RX             (RX),
@@ -842,10 +876,13 @@ module xlr8_alorium_top
                                    hinj_bixb_io_slv_out_en   ? hinj_bixb_io_slv_dbusout   :
                                    hinj_pcint_io_slv_out_en  ? hinj_pcint_io_slv_dbusout  :
 `endif
-`ifdef SNO_BOARD
+`ifdef SNO_OR_SNOM2_BOARD
                                    pport_a_io_slv_out_en     ? pport_a_io_slv_dbusout     :
                                    pport_e_io_slv_out_en     ? pport_e_io_slv_dbusout     :
                                    pport_g_io_slv_out_en     ? pport_g_io_slv_dbusout     :
+`endif
+`ifdef SNOM2_BOARD
+                                   pport_h_io_slv_out_en     ? pport_h_io_slv_dbusout     :
 `endif
                                    xlr8_gpio_dbusout;
 
@@ -866,10 +903,13 @@ module xlr8_alorium_top
                                    hinj_bixb_io_slv_out_en   ||
                                    hinj_pcint_io_slv_out_en  ||
 `endif
-`ifdef SNO_BOARD
+`ifdef SNO_OR_SNOM2_BOARD
                                    pport_a_io_slv_out_en     || 
                                    pport_e_io_slv_out_en     ||
                                    pport_g_io_slv_out_en     ||
+`endif
+`ifdef SNOM2_BOARD
+                                   pport_h_io_slv_out_en     || 
 `endif
                                    xlr8_gpio_out_en;
 
@@ -918,13 +958,14 @@ module xlr8_alorium_top
               .ramwe                     (core_ramwe),            // Templated
               .dm_sel                    (core_dm_sel));          // Templated
    
-`ifdef SNO_BOARD
+`ifdef SNO_OR_SNOM2_BOARD
 
    // ======================= START of Extra Sno Board Ports ======================
 
    // porta_pads = {D27,D26,D25,D24,D23,D22};
    // porte_pads = {D33,D32,D31,D30,D29,D28};
-   // portg_pads = {D39,D38,D37,D36,D35,D34};
+   // portg_pads = {D41,D40,D39,D38,D37,D36,D35,D34};
+   // porth_pads = {D49,D48,D47,D46,D45,D44,D43,D42}; // SNOM2 Only
    
    // === PORT A === PORT A === PORT A === PORT A === PORT A === PORT A ===
    
@@ -1066,9 +1107,6 @@ module xlr8_alorium_top
    
    // === PORT G === PORT G === PORT G === PORT G === PORT G === PORT G ===
    
-   // Although ATMega328p has 8 bit registers for portG,
-   //  we'll just implement 6 bit registers
-
    //----------------------------------------------------------------------
    // Instance Name:  portmux_g_inst
    // Module Type:    xlr8_portmux
@@ -1076,7 +1114,7 @@ module xlr8_alorium_top
    //----------------------------------------------------------------------
    xlr8_portmux 
      #(
-       .WIDTH        (6)
+       .WIDTH        (8)
        )
    portmux_g_inst
      (
@@ -1086,14 +1124,14 @@ module xlr8_alorium_top
       // Inputs
       .port_portx  (portg_portx),
       .port_ddrx   (portg_ddrx),
-      .xb_ddoe     (xb_ddoe[37:32]),
-      .xb_ddov     (xb_ddov[37:32]),
-      .xb_pvoe     (xb_pvoe[37:32]),
-      .xb_pvov     (xb_pvov[37:32]),
+      .xb_ddoe     (xb_ddoe[39:32]),
+      .xb_ddov     (xb_ddov[39:32]),
+      .xb_pvoe     (xb_pvoe[39:32]),
+      .xb_pvov     (xb_pvov[39:32]),
       // Outputs
-      .port_pads   ({D39,D38,D37,D36,D35,D34}),
+      .port_pads   ({D41,D40,D39,D38,D37,D36,D35,D34}),
       .port_pinx   (portg_pinx),
-      .xb_pinx     (xb_pinx[37:32])
+      .xb_pinx     (xb_pinx[39:32])
       );
 
    //----------------------------------------------------------------------
@@ -1107,7 +1145,7 @@ module xlr8_alorium_top
        .DDRX_ADDR    (DDRG_Address),
        .PINX_ADDR    (PING_Address),
        .PCMSK_ADDR   (MSKG_Address),
-       .WIDTH        (6))
+       .WIDTH        (8))
    pport_g_inst
      (
       // Clock and Reset
@@ -1133,6 +1171,75 @@ module xlr8_alorium_top
       .pcifr_set   (portg_pcint) //                     Pin Change Int to xlr8_pcint
       );
    
+`ifdef SNOM2_BOARD
+   // === PORT H === PORT H === PORT H === PORT H === PORT H === PORT H ===
+
+   //----------------------------------------------------------------------
+   // Instance Name:  portmux_h_inst
+   // Module Type:    xlr8_portmux
+   //
+   //----------------------------------------------------------------------
+   xlr8_portmux 
+     #(
+       .WIDTH        (8)
+       )
+   portmux_h_inst
+     (
+      // Clock and Reset
+      .rstn        (core_rstn),
+      .clk         (clk_io),
+      // Inputs
+      .port_portx  (porth_portx),
+      .port_ddrx   (porth_ddrx),
+      .xb_ddoe     (xb_ddoe[47:40]),
+      .xb_ddov     (xb_ddov[47:40]),
+      .xb_pvoe     (xb_pvoe[47:40]),
+      .xb_pvov     (xb_pvov[47:40]),
+      // Outputs
+      .port_pads   ({D49,D48,D47,D46,D45,D44,D43,D42}),
+      .port_pinx   (porth_pinx),
+      .xb_pinx     (xb_pinx[47:40])
+      );
+
+   //----------------------------------------------------------------------
+   // Instance Name:  pport_h_inst
+   // Module Type:    xlr8_avr_port
+   //
+   //----------------------------------------------------------------------
+   xlr8_avr_port 
+     #(
+       .PORTX_ADDR   (PORTH_Address),
+       .DDRX_ADDR    (DDRH_Address),
+       .PINX_ADDR    (PINH_Address),
+       .PCMSK_ADDR   (MSKH_Address),
+       .WIDTH        (8))
+   pport_h_inst
+     (
+      // Clock and Reset
+      .rstn        (core_rstn),
+      .clk         (clk_io),
+      .clken       (1'b1),
+      // I/O
+      .adr         (io_arb_mux_adr),
+      .dbus_in     (io_arb_mux_dbusout),
+      .dbus_out    (pport_h_io_slv_dbusout),
+      .iore        (io_arb_mux_iore),
+      .iowe        (io_arb_mux_iowe),
+      .io_out_en   (pport_h_io_slv_out_en),
+      // DM
+      .ramadr      (core_ramadr_lo8[7:0]),
+      .ramre       (core_ramre),
+      .ramwe       (core_ramwe),
+      .dm_sel      (core_dm_sel),
+      // External connection
+      .portx       (porth_portx),
+      .ddrx        (porth_ddrx),
+      .pinx        (porth_pinx),
+      .pcifr_set   (porth_pcint) //                     Pin Change Int to xlr8_pcint
+      );
+`endif //`ifdef SNOM2_BOARD 
+   
+
    //----------------------------------------------------------------------
    // Instance Name:  sno_pcint_inst
    // Module Type:    xlr8_pcint
@@ -1143,7 +1250,7 @@ module xlr8_alorium_top
        .XICR_Address (SPCICR_Address),
        .XIFR_Address (SPCIFR_Address),
        .XMSK_Address (SPCIMSK_Address),
-       .WIDTH        (3)
+       .WIDTH        (NUM_SNO_XPORTS) // SNO=3, SNOM2=4
        )
    sno_pcint_inst
      (
@@ -1163,13 +1270,17 @@ module xlr8_alorium_top
       .ramwe        (core_ramwe),
       .dm_sel       (core_dm_sel),
       // 
-      .x_int_in     ({portg_pcint,porte_pcint,porta_pcint}),
+`ifdef SNOM2_BOARD
+      .x_int_in     ({porth_pcint,portg_pcint,porte_pcint,porta_pcint}), // SNOM2, add port H
+`else
+      .x_int_in     ({portg_pcint,porte_pcint,porta_pcint}), // Plain Old Sno, no port H
+`endif // `ifdef SNOM2_BOARD
       .x_irq        (xlr8_bi_irq),
-      .x_irq_ack    (3'h0) // Don't use acks here
+//      .x_irq_ack    (NUM_SNO_XPORTS'h0) // Don't use acks here
+      .x_irq_ack    ('h0) // Don't use acks here
       );
    
-
-`endif //  `ifdef SNO_BOARD
+`endif //  `ifdef SNO_OR_SNOM2_BOARD
    // ======================= END of Extra Sno Board Ports ======================
    
    

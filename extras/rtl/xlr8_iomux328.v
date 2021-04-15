@@ -21,7 +21,7 @@ module xlr8_iomux328
     inout [7:0]   portd_pads,
     inout         SDA,
     inout         SCL,
-`ifdef SNO_BOARD
+`ifdef SNO_OR_SNOM2_BOARD
     // For the Sno board, RX and TX are now seperate pins, so they have 
     // thier own outputs from iomux and are not on shared pins anymore.
     input         RX, // Dedicated pin now
@@ -321,7 +321,7 @@ module xlr8_iomux328
    assign portd_pvov[2]  = 1'h0;
    assign portd_dieoe[2] = pcint_irq[18] && pcie1 || INT0_enable; // FIXME : using pcie1 matches spec, but does it make sense?
 
-`ifdef SNO_BOARD
+`ifdef SNO_OR_SNOM2_BOARD
    // On the Sno FPGA the RX/TX signals have dedicated pins and no 
    // longer share pins with D0/D1. The following portd*[1:0] 
    // assignments are simplified to remove the RX/TX functionality.
@@ -359,7 +359,7 @@ module xlr8_iomux328
    assign portd_pvov[0] = 1'b0;
    assign portd_dieoe[0] = pcint_irq[16] && pcie2;
 
-`endif // `ifdef SNO_BOARD
+`endif //
   
    assign portd_pue = ( portd_puoe & portd_puov) |  // pullup enable (currently unused)
                       (~portd_puoe & ({8{~PUD}} & ~portd_ddrx[7:0] & portd_portx[7:0]));
@@ -389,7 +389,7 @@ module xlr8_iomux328
    assign INT1_rcv = portd_pinx[3];
    assign INT0_rcv = portd_pinx[2];
 
-`ifdef SNO_BOARD
+`ifdef SNO_OR_SNOM2_BOARD
    // On the Sno FPGA the RX/TX signals have dedicated pins and no 
    // longer share pins with D0/D1. The following assignments are  
    // new, to implement the RX/TX
@@ -397,7 +397,7 @@ module xlr8_iomux328
    assign RXD_rcv  = RX; // No longer sharing with portd[0]
 `else // XLR8 Board   
    assign RXD_rcv  = portd_pinx[0];
-`endif // `ifdef SNO_BOARD  
+`endif //  
    
    assign pcint_rcv[7:0] = {2'b00,portb_pinx[5:0]}; //
    assign pcint_rcv[14:8] = {1'b0,portc_pinx[5:0]};
