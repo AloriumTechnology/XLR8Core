@@ -94,7 +94,7 @@ module xlr8_clocks
    logic             PRTIM2;
    logic             PRTWI;
    
-   logic             clkx2p,clkx4p;
+   logic             pll_clk4,pll_clk2,clkx2p_for_clkx4;
    logic [CLKCNT_WIDTH-1:0] clkcnt;
    logic [6:0]              clkcnt125;
    logic [9:0]              clkcnt_intosc;
@@ -158,6 +158,23 @@ module xlr8_clocks
    // In simulation, skip pll model and just do a div by 16
    reg                  locked_reg;
    wire                 Clock_dly;
+   // Calculate configurable values from the parameters defined in
+   // evo_pll.vh. They have a default type of intergar so we need to
+   // use floating point numbers in the calculations to ensure they
+   // don't round results off. 
+   localparam PLL_REF = 16.0;        // PLL Reference Clock
+   localparam PLL_SCALE = 1000000.0; // Scale to timescale of 1.0 picoseconds
+
+   localparam PLL2_MULTIPLY_BY = 1.0*XLR8_PLL_CLK2_MULTIPLY_BY;
+   localparam PLL2_DIVIDE_BY = 1.0*XLR8_PLL_CLK2_DIVIDE_BY;
+   localparam PLL2_FREQ = PLL_REF*(PLL2_MULTIPLY_BY/PLL2_DIVIDE_BY);
+   localparam PLL2_HPERIOD = PLL_SCALE/(2.0*PLL2_FREQ); // Half Period
+
+   localparam PLL4_MULTIPLY_BY = 1.0*XLR8_PLL_CLK4_MULTIPLY_BY;
+   localparam PLL4_DIVIDE_BY = 1.0*XLR8_PLL_CLK4_DIVIDE_BY;
+   localparam PLL4_FREQ = PLL_REF*(PLL4_MULTIPLY_BY/PLL4_DIVIDE_BY);
+   localparam PLL4_HPERIOD = PLL_SCALE/(2.0*PLL4_FREQ); // Half Period
+
    initial locked_reg = 1'b0;
    always @(posedge Clock) locked_reg <= 1'b1;
    assign locked_adcref = locked_reg;
@@ -166,10 +183,23 @@ module xlr8_clocks
    always @(posedge Clock) clockdiv <= clockdiv + 4'h1;
    assign clk_adcref = clockdiv[3];
    assign #15.625ns Clock_dly = Clock;
+
+   // Clock tap c4, default is 32MHz
    assign clkx2 = Clock ^ Clock_dly;
-   assign #7.812ns clkx2p = clkx2; // might not be same phase pll gives but should be okay in simulation
-   assign clkx4 = clkx2 ^ clkx2p;
-   assign #3.906ns clkx4p = clkx4; // might not be same phase pll gives but should be okay in simulation
+
+   // Clock tap c3, default is 32MHz with phase shift
+   initial pll_clk4 = 1'b0;
+   always #PLL4_HPERIOD pll_clk4  = !pll_clk4; // Configured in pll16.vh
+
+   // Clock tap c1, default is 64MHz
+   assign #7.812ns clkx2p_for_clkx4 = clkx2; // might not be same phase pll gives but should be okay in simulation
+   assign clkx4 = clkx2 ^ clkx2p_for_clkx4;
+
+   // Clock tap c2, default is 64MHz with phase shift
+   //   assign #3.906ns clkx4p = clkx4; // might not be same phase pll gives but should be okay in simulation
+   initial pll_clk2 = 1'b0;
+   always #PLL2_HPERIOD pll_clk2  = !pll_clk2; // Configured in pll16.vh
+
 `else
    generate if (PLL_SELECT == 1)
      //choose which pll to use 
@@ -186,9 +216,9 @@ module xlr8_clocks
                      .inclk0 ( Clock ),
                      .c0 ( clk_adcref ),
                      .c1 ( clkx4  ), // input x4 = 64MHz
-                     .c2 ( clkx4p ), // plus phase shift which perhaps would be used by memories
+                     .c2 ( pll_clk2 ), // plus phase shift which perhaps would be used by memories
                      .c3 ( clkx2  ), // x2 = 32MHz
-                     .c4 ( clkx2p ), // x2 plus phase shift
+                     .c4 ( pll_clk4 ), // x2 plus phase shift
                      .locked ( locked_adcref )
                      );
    endgenerate
@@ -254,8 +284,8 @@ module xlr8_clocks
    always_comb clk_tim2 = clk_cpu;
    always_comb clk_twi = clk_cpu;
 
-   always_comb clk_option2 = clkx4p;
-   always_comb clk_option4 = clkx2p;
+   always_comb clk_option2 = pll_clk2;
+   always_comb clk_option4 = pll_clk4;
    
    //      clkgate_altclkctrl_0 altclkctrl_0 (
    //              .inclk  (inclk),  //  altclkctrl_input.inclk

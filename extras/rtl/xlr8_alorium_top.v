@@ -20,11 +20,39 @@
 //   (modified from version 0.61 09.06.2012, written by Ruslan 
 //    Lepetenok and downloaded from Opencores)
 //
+//   Board Type: The board type was originally determined by looking
+//   at the values defined in the DESIGN_CONFIG parameter and
+//   determining the board type from those. As the number of board
+//   types grew we also began to use DEFINEs to specify the board
+//   type, while still using the DESIGN_CONFIG valiable as
+//   well. Eventually it was no longer possible to determine the board
+//   type just from the DESIGN_CONFIG fields, so a new field was added
+//   that specifies the board type explicitely. The board type values
+//   are as follows:
+//
+//   
+//   |------------+------------+-----------------------------------------|
+//   | Board Code | Board Type | Description                             |
+//   |------------+------------+-----------------------------------------|
+//   |     0      | Legacy     | use old methods to determine board type |
+//   |     1      | XLR8       | Original UNo compatible board           |
+//   |     2      | SNO        | First small form factor board           |
+//   |     3      | HINJ       | Big prototyping board                   |
+//   |     4      | BTBEE      | XBee form factor                        |
+//   |     5      | DE10LITE   | Terasic DE10-Lite board                 |
+//   |     6      | SNOM2      | Digikey MicroMod form factor            |
+//   |     7      | SNOEDGE    | Sno with DDR2 Edge connector, M25 FPGA  |
+//   |     8      | SNOEDGE50  | Sno with DDR2 Edge connector, M50 FPGA  |
+//   |------------+------------+-----------------------------------------|
+//
 //===========================================================================
 
 
 `include "synth_ctrl_pack.vh"
 `include "avr_adr_pack.vh"
+`ifdef PLL_SIM_MODEL
+`include "pll16.vh"
+`endif
 
 
 // Define XLR8_BOARD if no other board defined
@@ -34,32 +62,58 @@
  `ifdef SNOM2_BOARD
   `include "snom2_adr_pack.vh"
  `else
-  `ifdef HINJ_BOARD
-   `include "hinj_adr_pack.vh"
+  `ifdef SNOEDGE_BOARD
+   `include "snoedge_adr_pack.vh"
   `else
-   `ifdef BTBEE_BOARD
-    `include "btbee_adr_pack.vh"
+   `ifdef SNOEDGE50_BOARD
+    `include "snoedge_adr_pack.vh" // use the same file as SNOEDGE
    `else
-    `define XLR8_BOARD
+    `ifdef HINJ_BOARD
+     `include "hinj_adr_pack.vh"
+    `else
+     `ifdef BTBEE_BOARD
+      `include "btbee_adr_pack.vh"
+     `else
+      `define XLR8_BOARD
+     `endif
+    `endif
    `endif
   `endif
- `endif
+ `endif 
 `endif 
 
 // Define SNO_OR_SNOM2_BOARD if either are defined
 `ifdef SNO_BOARD
  `define SNO_OR_SNOM2_BOARD
-`else 
- `ifdef SNOM2_BOARD
-  `define SNO_OR_SNOM2_BOARD
- `endif
+ `define ANY_SNO_BOARD
+`endif
+
+`ifdef SNOM2_BOARD
+ `define SNO_OR_SNOM2_BOARD
+ `define SNOM2_OR_SNOEDGE_BOARD
+ `define ANY_SNO_BOARD
+`endif
+
+`ifdef SNOEDGE_BOARD
+ `define SNOM2_OR_SNOEDGE_BOARD
+ `define ANY_SNO_BOARD
+ `define ANY_SNOEDGE_BOARD
+ `define USE_DUAL_ADC // use xlr8_adc_dual instead of xlr8_adc in xlr8_atmega328clone 
+`endif
+
+`ifdef SNOEDGE50_BOARD // Just copies the same settings as SNOEDGE
+ `define SNOM2_OR_SNOEDGE_BOARD
+ `define ANY_SNO_BOARD
+ `define ANY_SNOEDGE_BOARD
+ `define USE_DUAL_ADC // use xlr8_adc_dual instead of xlr8_adc in xlr8_atmega328clone 
 `endif
 
 module xlr8_alorium_top
   #(
     parameter DESIGN_CONFIG = 520,
     //    {
-    //     10'd0, // [31:15] - reserved
+    //     8'd0,  // [31:24] - Board type      0 = Not specified, figure out via other fields
+    //     9'd0,  // [23:15] - reserved
     //     8'h2,  //  [14]   - Compact,        0 = Analog/Flash,    1 = Compact
     //     8'h8,  // [13:6]  - MAX10 Size,     ex: 0x8 = M08, 0x32 = M50
     //     1'b0,  //   [5]   - ADC_SWIZZLE,    0 = XLR8,            1 = Sno
@@ -87,6 +141,9 @@ module xlr8_alorium_top
 `ifdef SNOM2_BOARD
     // Include Sno M2 I/O definitions from another file
  `include "xlr8_alorium_top_io_snom2.vh"
+`elsif ANY_SNOEDGE_BOARD
+    // Include Sno Edge I/O definitions from another file
+ `include "xlr8_alorium_top_io_snoedge.vh"
 `elsif HINJ_BOARD
     // Include Hinj I/O definitions from another file
  `include "xlr8_alorium_top_io_hinj.vh"
@@ -144,6 +201,67 @@ module xlr8_alorium_top
 `endif
     );
 
+   // Set up codes for different board types
+   localparam XLR8_BOARD_CODE       = 1;
+   localparam SNO_BOARD_CODE        = 2;
+   localparam HINJ_BOARD_CODE       = 3;
+   localparam BTBEE_BOARD_CODE      = 4;
+   localparam DE10LITE_BOARD_CODE   = 5;
+   localparam SNOM2_BOARD_CODE      = 6;
+   localparam SNOEDGE_BOARD_CODE    = 7;
+   localparam SNOEDGE50_BOARD_CODE  = 8;
+
+   // Set values based on board type
+`ifdef HINJ_BOARD
+   localparam BOARD_TYPE = HINJ_BOARD_CODE; 
+   localparam NUM_PINS   = 122; // A[5:0],D[13:0] and Hinj Specific GPIO
+`elsif SNOEDGE_BOARD
+   localparam BOARD_TYPE = SNOEDGE_BOARD_CODE; 
+   localparam NUM_PINS   = 108; // A[5:0],D[13:0] and D[109:22]
+   localparam NUM_SNO_XPORTS = 6; // Number of "extra" ports (A,E,G,J,K,PL)
+`elsif SNOEDGE50_BOARD
+   localparam BOARD_TYPE = SNOEDGE50_BOARD_CODE; 
+   localparam NUM_PINS   = 108; // A[5:0],D[13:0] and D[109:22]
+   localparam NUM_SNO_XPORTS = 6; // Number of "extra" ports (A,E,G,J,K,PL)
+`elsif SNOM2_BOARD
+   localparam BOARD_TYPE = SNOM2_BOARD_CODE; 
+   localparam NUM_PINS   = 48; // A[5:0],D[13:0] and D[49:22]
+   localparam NUM_SNO_XPORTS = 4; // Number of "extra" ports (A,E,G,H)
+`elsif SNO_BOARD
+   localparam BOARD_TYPE = SNO_BOARD_CODE; 
+   localparam NUM_PINS   = 40; // A[5:0],D[13:0] and D[41:22]
+   localparam NUM_SNO_XPORTS = 3; // Number of "extra" ports (A,E,G)
+`elsif BTBEE_BOARD
+   localparam BOARD_TYPE = BTBEE_BOARD_CODE; 
+   localparam NUM_PINS   = 52; // A[5:0],D[13:0] and Btbee Specific GPIO
+`elsif DE10LITE__BOARD
+   localparam BOARD_TYPE = DE10LITE_BOARD_CODE; 
+   localparam NUM_PINS   = 52; // A[5:0],D[13:0] and Btbee Specific GPIO
+`else // XLR8_BOARD
+   localparam BOARD_TYPE = XLR8_BOARD_CODE; 
+   localparam NUM_PINS   = 20; // A[5:0] and D[13:0]
+`endif
+
+   localparam QUAD_OFFSET  = (BOARD_TYPE ==   SNOEDGE_BOARD_CODE) ? 40 : // Port J
+                             (BOARD_TYPE == SNOEDGE50_BOARD_CODE) ? 40 : // Port J
+                                                                     0;  // Default = pin 0
+   localparam SERVO_OFFSET = (BOARD_TYPE ==   SNOEDGE_BOARD_CODE) ? 72 : // Port K
+                             (BOARD_TYPE == SNOEDGE50_BOARD_CODE) ? 72 : // Port K
+                                                                     0;  // Default = pin 0
+   
+   // Create a fully loaded version of DESIGN_CONFIG by adding the BOARD_TYPE field 
+   // to the MSB of DESIGN_CONFIG
+   //     8'd0,  // [31:24] - Board type      0 = Not specified, figure out via other fields
+   //     9'd0,  // [23:15] - reserved
+   //     8'h2,  //  [14]   - Compact,        0 = Analog/Flash,    1 = Compact
+   //     8'h8,  // [13:6]  - MAX10 Size,     ex: 0x8 = M08, 0x32 = M50
+   //     1'b0,  //   [5]   - ADC_SWIZZLE,    0 = XLR8,            1 = Sno
+   //     1'b0,  //   [4]   - PLL Speed,      0 = 16MHz PLL,       1 = 50Mhz PLL
+   //     1'b1,  //   [3]   - Force 16K PMEM, 0 = FPGA Dependent,  1 = 16K
+   //     2'd0,  //  [2:1]  - Clock Speed,    0 = 16MHZ,           1 = 32MHz, 2 = 64MHz, 3=na
+   //     1'b0   //   [0]   - FPGA Image,     0 = CFM Application, 1 = CFM Factory            
+   localparam DC_FULL = {BOARD_TYPE[7:0],DESIGN_CONFIG[23:0]};
+
    // FIXME: Eliminate any of these that aren't used
    // Select relevant fields from the DESIGN_CONFIG parameter
    localparam DESIGN_CONFIG_FPGA_SIZE = DESIGN_CONFIG[13:6];
@@ -169,19 +287,7 @@ module xlr8_alorium_top
                               (DESIGN_CONFIG_FPGA_SIZE == 8'h08) ? 13 : 13; // M08
    localparam UFM_BC_WIDTH = 4;
    localparam NUM_UNO_PINS   = 20; // A[5:0] and D[13:0]
-`ifdef HINJ_BOARD
-   localparam NUM_PINS   = 122; // A[5:0],D[13:0] and Hinj Specific GPIO
-`elsif SNOM2_BOARD
-   localparam NUM_PINS   = 48; // A[5:0],D[13:0] and D[49:22]
-   localparam NUM_SNO_XPORTS = 4; // Number of "extra" ports
-`elsif SNO_BOARD
-   localparam NUM_PINS   = 40; // A[5:0],D[13:0] and D[41:22]
-   localparam NUM_SNO_XPORTS = 3; // Number of "extra" ports
-`elsif BTBEE_BOARD
-   localparam NUM_PINS   = 52; // A[5:0],D[13:0] and Btbee Specific GPIO
-`else
-   localparam NUM_PINS   = 20; // A[5:0] and D[13:0]
-`endif   
+   localparam NUM_SNO_PINS   = 40; // D, B, and C, plus A, E, and G
    localparam NUM_XBS    = 4; // Number of XB inputs to xb_pinmux
    localparam CLOCK_SELECT = DESIGN_CONFIG[2:1]; // 2 bits. 0=16MHZ, 1=32MHz, 2=64MHz, 3=reserved
    localparam PLL_SELECT   = DESIGN_CONFIG[4];  // 1=50MHz PLL, 0=16MHz PLL
@@ -190,10 +296,13 @@ module xlr8_alorium_top
    localparam USE_NEOPIXEL_UNIT  = APP_XB0_ENABLE[2];
    localparam USE_QUADRATURE_UNIT     = APP_XB0_ENABLE[3];
    localparam USE_PID_UNIT       = APP_XB0_ENABLE[4];
+
+/* SJP ----------------------------------------------------------------------
    localparam DC_FILLER = DESIGN_CONFIG[9:0]; // trying to work around Quartus QXP issue
 //   localparam DESIGN_CONFIG_WITH_DMEM = {DC_FILLER[9:0],DM_SIZE[7:0],DESIGN_CONFIG[13:0]};
    localparam DESIGN_CONFIG_WITH_DMEM = {DM_SIZE,DESIGN_CONFIG[13:0]};
-
+   ---------------------------------------------------------------------- SJP */
+   
    logic        RXD_rcv;
    /*AUTOREGINPUT*/
    // Beginning of automatic reg inputs (for undeclared instantiated-module inputs)
@@ -272,7 +381,7 @@ module xlr8_alorium_top
    logic [7:0]             portd_pinx;             // From iomux328_inst of xlr8_iomux328.v
    logic [7:0]             portd_portx;            // From uc_top_wrp_vlog_inst of `XLR8_AVR_CORE_MODULE_NAME.v
    // Both the Sno and the Sno M2 have ports A, E, and G
-`ifdef SNO_OR_SNOM2_BOARD
+`ifdef ANY_SNO_BOARD
    logic [5:0]             porta_pads;  // Port A
    logic [5:0]             porta_ddrx;
    logic [5:0]             porta_pinx;
@@ -288,7 +397,7 @@ module xlr8_alorium_top
    logic [7:0]             portg_pinx;
    logic [7:0]             portg_portx;
    logic                   portg_pcint;
-`endif //  `ifdef SNO_OR_SNOM2_BOARD
+`endif //  `ifdef ANY_SNO_BOARD
    // The Sno M2 also has port H
 `ifdef SNOM2_BOARD
    logic [7:0]             porth_pads;  // Port H
@@ -296,7 +405,12 @@ module xlr8_alorium_top
    logic [7:0]             porth_pinx;
    logic [7:0]             porth_portx;
    logic                   porth_pcint;
-`endif
+`endif // SNOM2_BOARD
+`ifdef ANY_SNOEDGE_BOARD
+   logic                   portk_pcint;
+   logic                   portj_pcint;
+   logic                   portpl_pcint;
+`endif // ANY_SNOEDGE_BOARD
    logic                   pwr_on_nrst;            // From clocks_inst of xlr8_clocks.v
    logic                   rst_flash_n;            // From uc_top_wrp_vlog_inst of `XLR8_AVR_CORE_MODULE_NAME.v
    logic                   scki;                   // From iomux328_inst of xlr8_iomux328.v
@@ -370,7 +484,9 @@ module xlr8_alorium_top
    logic [7:0]                 hinj_bi_pinx;
    logic                       hinj_bixb_pcint;
 `endif
-`ifdef SNO_OR_SNOM2_BOARD
+`ifdef ANY_SNO_BOARD
+   wire [7:0]                  sno_pcint_io_slv_dbusout;
+   wire                        sno_pcint_io_slv_out_en;
    wire [7:0]                  pport_a_io_slv_dbusout;
    wire [7:0]                  pport_e_io_slv_dbusout;
    wire [7:0]                  pport_g_io_slv_dbusout;
@@ -378,10 +494,17 @@ module xlr8_alorium_top
    wire                        pport_e_io_slv_out_en;
    wire                        pport_g_io_slv_out_en;
 `endif
-`ifdef SNOM2_BOARD
+`ifdef SNOM2__BOARD
    wire [7:0]                  pport_h_io_slv_dbusout;
    wire                        pport_h_io_slv_out_en;
 `endif   
+`ifdef ANY_SNOEDGE_BOARD
+   wire [7:0]                  snoedge_gpio_io_slv_dbusout;
+   wire                        snoedge_gpio_io_slv_out_en;
+   wire [7:0]                  snoedge_pcint_io_slv_dbusout;
+   wire                        snoedge_pcint_io_slv_out_en;
+   logic [3:0]                 snoedge_gpio_pcint;
+`endif
 `ifdef BTBEE_BOARD
    wire [7:0]                  btbee_gpio_io_slv_dbusout;
    wire                        btbee_gpio_io_slv_out_en;
@@ -492,8 +615,8 @@ module xlr8_alorium_top
    //   Servo
    assign xbs_ddoe[1] = {NUM_PINS{1'b0}}; // Library still sets the data direction
    assign xbs_ddov[1] = {NUM_PINS{1'b0}};
-   assign xbs_pvoe[1] = {{(NUM_PINS-NUM_SERVOS){1'b0}},servos_en[NUM_SERVOS-1:0]};
-   assign xbs_pvov[1] = {{(NUM_PINS-NUM_SERVOS){1'b0}},servos_out[NUM_SERVOS-1:0]};
+   assign xbs_pvoe[1] = {{(NUM_PINS-NUM_SERVOS-SERVO_OFFSET){1'b0}},servos_en[NUM_SERVOS-1:0], {SERVO_OFFSET{1'b0}}};
+   assign xbs_pvov[1] = {{(NUM_PINS-NUM_SERVOS-SERVO_OFFSET){1'b0}},servos_out[NUM_SERVOS-1:0],{SERVO_OFFSET{1'b0}}};
    //   NeoPixel
    assign xbs_ddoe[2] = {NUM_PINS{1'b0}}; // Library still sets the data direction
    assign xbs_ddov[2] = {NUM_PINS{1'b0}};
@@ -600,7 +723,7 @@ module xlr8_alorium_top
                                 .portc_pads     ({A5,A4,A3,A2,A1,A0}),
 `ifdef HINJ_BOARD
                                 .portd_pads     ({D7,D6,D5,D4,D3,D2,D1,D0}),
-`elsif SNO_OR_SNOM2_BOARD
+`elsif ANY_SNO_BOARD
                                 .portd_pads     ({D7,D6,D5,D4,D3,D2,D1,D0}),
                                 .TX             (TX),
                                 .RX             (RX),
@@ -744,7 +867,7 @@ module xlr8_alorium_top
    `XLR8_AVR_CORE_MODULE_NAME
      #(/*AUTOINSTPARAM*/
        // Parameters
-       .DESIGN_CONFIG        (DESIGN_CONFIG),
+       .DESIGN_CONFIG        (DC_FULL), // Passing full DESIGN_CONFIG with BOARD_TYPE
        .UFM_ADR_WIDTH        (UFM_ADR_WIDTH),
        .PM_REAL_SIZE         (PM_REAL_SIZE),
        .UFM_BC_WIDTH         (UFM_BC_WIDTH))
@@ -757,7 +880,7 @@ module xlr8_alorium_top
 `ifdef HINJ_BOARD
       // Feed in the Wifi GPIO pins for Port C
       .pcint_rcv   ({pcint_rcv[23:16], 2'b00, hinj_bi_pinx[5:0], pcint_rcv[7:0]}),
-`else // For XLR8 One and Sno
+`else // For XLR8 One and Any_Sno
       .pcint_rcv   (pcint_rcv[23:0]),
 `endif
       // UART related
@@ -859,57 +982,65 @@ module xlr8_alorium_top
    
 
 
-   assign stgi_xf_io_slv_dbusout = stgi_xf_float_out_en      ? stgi_xf_float_dbusout      :
-                                   stgi_xf_neopixel_out_en   ? stgi_xf_neopixel_dbusout   :
-                                   stgi_xf_servo_out_en      ? stgi_xf_servo_dbusout      :
-                                   stgi_xf_quadrature_out_en ? stgi_xf_quadrature_dbusout :
-                                   stgi_xf_pid_out_en        ? stgi_xf_pid_dbusout        :
-                                   xb_openxlr8_out_en        ? xb_openxlr8_dbusout        :
-                                   xlr8_clocks_out_en        ? xlr8_clocks_dbusout        :
-                                   xlr8_irq_io_slv_out_en    ? xlr8_irq_io_slv_dbusout    :
+   assign stgi_xf_io_slv_dbusout = stgi_xf_float_out_en        ? stgi_xf_float_dbusout        :
+                                   stgi_xf_neopixel_out_en     ? stgi_xf_neopixel_dbusout     :
+                                   stgi_xf_servo_out_en        ? stgi_xf_servo_dbusout        :
+                                   stgi_xf_quadrature_out_en   ? stgi_xf_quadrature_dbusout   :
+                                   stgi_xf_pid_out_en          ? stgi_xf_pid_dbusout          :
+                                   xb_openxlr8_out_en          ? xb_openxlr8_dbusout          :
+                                   xlr8_clocks_out_en          ? xlr8_clocks_dbusout          :
+                                   xlr8_irq_io_slv_out_en      ? xlr8_irq_io_slv_dbusout      :
 `ifdef BTBEE_BOARD
-                                   btbee_gpio_io_slv_out_en  ? btbee_gpio_io_slv_dbusout  :
-                                   btbee_pcint_io_slv_out_en ? btbee_pcint_io_slv_dbusout :
+                                   btbee_gpio_io_slv_out_en    ? btbee_gpio_io_slv_dbusout    :
+                                   btbee_pcint_io_slv_out_en   ? btbee_pcint_io_slv_dbusout   :
 `endif
 `ifdef HINJ_BOARD
-                                   hinj_gpio_io_slv_out_en   ? hinj_gpio_io_slv_dbusout   :
-                                   hinj_bixb_io_slv_out_en   ? hinj_bixb_io_slv_dbusout   :
-                                   hinj_pcint_io_slv_out_en  ? hinj_pcint_io_slv_dbusout  :
+                                   hinj_gpio_io_slv_out_en     ? hinj_gpio_io_slv_dbusout     :
+                                   hinj_bixb_io_slv_out_en     ? hinj_bixb_io_slv_dbusout     :
+                                   hinj_pcint_io_slv_out_en    ? hinj_pcint_io_slv_dbusout    :
 `endif
-`ifdef SNO_OR_SNOM2_BOARD
-                                   pport_a_io_slv_out_en     ? pport_a_io_slv_dbusout     :
-                                   pport_e_io_slv_out_en     ? pport_e_io_slv_dbusout     :
-                                   pport_g_io_slv_out_en     ? pport_g_io_slv_dbusout     :
+`ifdef ANY_SNO_BOARD
+                                   sno_pcint_io_slv_out_en     ? sno_pcint_io_slv_dbusout     :
+                                   pport_a_io_slv_out_en       ? pport_a_io_slv_dbusout       :
+                                   pport_e_io_slv_out_en       ? pport_e_io_slv_dbusout       :
+                                   pport_g_io_slv_out_en       ? pport_g_io_slv_dbusout       :
 `endif
 `ifdef SNOM2_BOARD
-                                   pport_h_io_slv_out_en     ? pport_h_io_slv_dbusout     :
+                                   pport_h_io_slv_out_en       ? pport_h_io_slv_dbusout       :
+`endif
+`ifdef ANY_SNOEDGE_BOARD
+                                   snoedge_gpio_io_slv_out_en  ? snoedge_gpio_io_slv_dbusout  :
 `endif
                                    xlr8_gpio_dbusout;
 
-   assign stgi_xf_io_slv_out_en  = stgi_xf_float_out_en      ||
-                                   stgi_xf_neopixel_out_en   || 
-                                   stgi_xf_servo_out_en      ||
-                                   stgi_xf_quadrature_out_en || 
-                                   stgi_xf_pid_out_en        || 
-                                   xb_openxlr8_out_en        ||
-                                   xlr8_clocks_out_en        || 
-                                   xlr8_irq_io_slv_out_en    || 
+   assign stgi_xf_io_slv_out_en  = stgi_xf_float_out_en        ||
+                                   stgi_xf_neopixel_out_en     || 
+                                   stgi_xf_servo_out_en        ||
+                                   stgi_xf_quadrature_out_en   || 
+                                   stgi_xf_pid_out_en          || 
+                                   xb_openxlr8_out_en          ||
+                                   xlr8_clocks_out_en          || 
+                                   xlr8_irq_io_slv_out_en      || 
 `ifdef BTBEE_BOARD
-                                   btbee_gpio_io_slv_out_en  ||
-                                   btbee_pcint_io_slv_out_en ||
+                                   btbee_gpio_io_slv_out_en    ||
+                                   btbee_pcint_io_slv_out_en   ||
 `endif
 `ifdef HINJ_BOARD
-                                   hinj_gpio_io_slv_out_en   ||
-                                   hinj_bixb_io_slv_out_en   ||
-                                   hinj_pcint_io_slv_out_en  ||
+                                   hinj_gpio_io_slv_out_en     ||
+                                   hinj_bixb_io_slv_out_en     ||
+                                   hinj_pcint_io_slv_out_en    ||
 `endif
-`ifdef SNO_OR_SNOM2_BOARD
-                                   pport_a_io_slv_out_en     || 
-                                   pport_e_io_slv_out_en     ||
-                                   pport_g_io_slv_out_en     ||
+`ifdef ANY_SNO_BOARD
+                                   sno_pcint_io_slv_out_en     ||
+                                   pport_a_io_slv_out_en       || 
+                                   pport_e_io_slv_out_en       ||
+                                   pport_g_io_slv_out_en       ||
 `endif
 `ifdef SNOM2_BOARD
-                                   pport_h_io_slv_out_en     || 
+                                   pport_h_io_slv_out_en       || 
+`endif
+`ifdef ANY_SNOEDGE_BOARD
+                                   snoedge_gpio_io_slv_out_en  ||
 `endif
                                    xlr8_gpio_out_en;
 
@@ -937,7 +1068,7 @@ module xlr8_alorium_top
                .READREG3_VAL            (8'h0),
                /*AUTOINSTPARAM*/
                // Parameters
-               .DESIGN_CONFIG             (DESIGN_CONFIG_WITH_DMEM),
+               .DESIGN_CONFIG             (DC_FULL),
                .APP_XB0_ENABLE            (APP_XB0_ENABLE),
                .CLKSPD_ADDR               (CLKSPD_ADDR))
    gpio_inst (/*AUTOINST*/
@@ -958,14 +1089,13 @@ module xlr8_alorium_top
               .ramwe                     (core_ramwe),            // Templated
               .dm_sel                    (core_dm_sel));          // Templated
    
-`ifdef SNO_OR_SNOM2_BOARD
+`ifdef ANY_SNO_BOARD
 
    // ======================= START of Extra Sno Board Ports ======================
 
    // porta_pads = {D27,D26,D25,D24,D23,D22};
    // porte_pads = {D33,D32,D31,D30,D29,D28};
    // portg_pads = {D41,D40,D39,D38,D37,D36,D35,D34};
-   // porth_pads = {D49,D48,D47,D46,D45,D44,D43,D42}; // SNOM2 Only
    
    // === PORT A === PORT A === PORT A === PORT A === PORT A === PORT A ===
    
@@ -1250,7 +1380,7 @@ module xlr8_alorium_top
        .XICR_Address (SPCICR_Address),
        .XIFR_Address (SPCIFR_Address),
        .XMSK_Address (SPCIMSK_Address),
-       .WIDTH        (NUM_SNO_XPORTS) // SNO=3, SNOM2=4
+       .WIDTH        (NUM_SNO_XPORTS) // SNO=3, SNOM2=4, SNOEDGE = 7
        )
    sno_pcint_inst
      (
@@ -1270,17 +1400,99 @@ module xlr8_alorium_top
       .ramwe        (core_ramwe),
       .dm_sel       (core_dm_sel),
       // 
-`ifdef SNOM2_BOARD
+`ifdef ANY_SNOEDGE_BOARD
+      .x_int_in     ({portpl_pcint,portk_pcint,portj_pcint,
+                      portg_pcint,porte_pcint,porta_pcint}), // SNOEDGE
+`elsif SNOM2_BOARD
       .x_int_in     ({porth_pcint,portg_pcint,porte_pcint,porta_pcint}), // SNOM2, add port H
 `else
       .x_int_in     ({portg_pcint,porte_pcint,porta_pcint}), // Plain Old Sno, no port H
-`endif // `ifdef SNOM2_BOARD
+`endif // `ifdef ANY_SNOEDGE_BOARD
       .x_irq        (xlr8_bi_irq),
 //      .x_irq_ack    (NUM_SNO_XPORTS'h0) // Don't use acks here
       .x_irq_ack    ('h0) // Don't use acks here
       );
    
-`endif //  `ifdef SNO_OR_SNOM2_BOARD
+`endif //  `ifdef ANY_SNO_BOARD
+
+`ifdef ANY_SNOEDGE_BOARD
+   //----------------------------------------------------------------------
+   // Instance Name:  snoesge_gpio_inst
+   // Module Type:    xlr8_snoedge_gpio
+   //
+   //----------------------------------------------------------------------
+   xlr8_snoedge_gpio 
+     #(
+       .NUM_PINS       (NUM_PINS),
+       .NUM_SNO_PINS   (NUM_SNO_PINS),
+       .PORTPL_Address (PORTPL_Address),
+       .DDRPL_Address  (DDRPL_Address),
+       .PINPL_Address  (PINPL_Address),
+       .MSKPL_Address  (MSKPL_Address),
+       .PORTJ0_Address (PORTJ0_Address),
+       .DDRJ0_Address  (DDRJ0_Address),
+       .PINJ0_Address  (PINJ0_Address),
+       .MSKJ0_Address  (MSKJ0_Address),
+       .PORTJ1_Address (PORTJ1_Address),
+       .DDRJ1_Address  (DDRJ1_Address),
+       .PINJ1_Address  (PINJ1_Address),
+       .MSKJ1_Address  (MSKJ1_Address),
+       .PORTJ2_Address (PORTJ2_Address),
+       .DDRJ2_Address  (DDRJ2_Address),
+       .PINJ2_Address  (PINJ2_Address),
+       .MSKJ2_Address  (MSKJ2_Address),
+       .PORTJ3_Address (PORTJ3_Address),
+       .DDRJ3_Address  (DDRJ3_Address),
+       .PINJ3_Address  (PINJ3_Address),
+       .MSKJ3_Address  (MSKJ3_Address),
+       .PORTK0_Address (PORTK0_Address),
+       .DDRK0_Address  (DDRK0_Address),
+       .PINK0_Address  (PINK0_Address),
+       .MSKK0_Address  (MSKK0_Address),
+       .PORTK1_Address (PORTK1_Address),
+       .DDRK1_Address  (DDRK1_Address),
+       .PINK1_Address  (PINK1_Address),
+       .MSKK1_Address  (MSKK1_Address),
+       .PORTK2_Address (PORTK2_Address),
+       .DDRK2_Address  (DDRK2_Address),
+       .PINK2_Address  (PINK2_Address),
+       .MSKK2_Address  (MSKK2_Address),
+       .PORTK3_Address (PORTK3_Address),
+       .DDRK3_Address  (DDRK3_Address),
+       .PINK3_Address  (PINK3_Address),
+       .MSKK3_Address  (MSKK3_Address)
+       )
+   snoedge_gpio_inst 
+     (
+      // Clock and Reset
+      .rstn        (core_rstn),
+      .clk         (clk_io),
+      // I/O
+      .adr         (io_arb_mux_adr),
+      .dbus_in     (io_arb_mux_dbusout),
+      .dbus_out    (snoedge_gpio_io_slv_dbusout),
+      .iore        (io_arb_mux_iore),
+      .iowe        (io_arb_mux_iowe),
+      .io_out_en   (snoedge_gpio_io_slv_out_en),
+      // DM
+      .ramadr      (core_ramadr_lo8[7:0]),
+      .ramre       (core_ramre),
+      .ramwe       (core_ramwe),
+      .dm_sel      (core_dm_sel),
+      .xb_ddoe     (xb_ddoe[NUM_PINS-1:NUM_SNO_PINS]), // 107:40
+      .xb_ddov     (xb_ddov[NUM_PINS-1:NUM_SNO_PINS]),
+      .xb_pvoe     (xb_pvoe[NUM_PINS-1:NUM_SNO_PINS]),
+      .xb_pvov     (xb_pvov[NUM_PINS-1:NUM_SNO_PINS]),
+      // Outputs
+      .port_pads   ({PL[3:0],
+                     K[31:0],
+                     J[31:0]
+                     }),
+      .xb_pinx     (xb_pinx[NUM_PINS-1:NUM_SNO_PINS]), // 107:40
+      .pcint       ({portpl_pcint,portk_pcint,portj_pcint}) // Pin Change Interrupts
+      );
+   
+`endif // ANY_SNOEDGE_BOARD   
    // ======================= END of Extra Sno Board Ports ======================
    
    
@@ -1396,7 +1608,7 @@ module xlr8_alorium_top
    //----------------------------------------------------------------------
    xlr8_hinj_bixb 
      #(
-       .DESIGN_CONFIG  (DESIGN_CONFIG_WITH_DMEM),
+       .DESIGN_CONFIG  (DC_FULL),
        .WIFI_SPCR_ADDR (WIFI_SPCR_ADDR),
        .WIFI_SPSR_ADDR (WIFI_SPSR_ADDR),
        .WIFI_SPDR_ADDR (WIFI_SPDR_ADDR),
@@ -1622,8 +1834,8 @@ module xlr8_alorium_top
       if (USE_QUADRATURE_UNIT) begin: u_xb_quadrature
          for (iii=0; iii < NUM_QUADRATURES; iii = iii + 1)
            begin : u_xb_quadrature_for
-              assign quadratures_in_a[iii]   = xb_pinx[(iii+1)*2];
-              assign quadratures_in_b[iii]   = xb_pinx[(iii+1)*2+1];
+              assign quadratures_in_a[iii]   = xb_pinx[((iii+1)*2)+QUAD_OFFSET];
+              assign quadratures_in_b[iii]   = xb_pinx[((iii+1)*2)+QUAD_OFFSET+1];
            end
 
          //----------------------------------------------------------------------
@@ -1881,7 +2093,7 @@ module xlr8_alorium_top
    //----------------------------------------------------------------------
    openxlr8
      #(
-       .DESIGN_CONFIG     (DESIGN_CONFIG_WITH_DMEM),
+       .DESIGN_CONFIG     (DC_FULL),
        .NUM_PINS          (NUM_PINS),
        .OX8ICR_Address    (OX8ICR_Address),
        .OX8IFR_Address    (OX8IFR_Address),
@@ -1938,7 +2150,7 @@ module xlr8_alorium_top
       // Interrupts
       .xb_irq             (xb_openxlr8_irq)
       );
-
+   
 `ifdef STGI_ASSERT_ON
    ERROR_running_slow_d_mem_latency: assert property
    (@(posedge clk_cpu) disable iff (!rst_flash_n)
@@ -1951,3 +2163,5 @@ endmodule: xlr8_alorium_top
 // verilog-library-flags:("-y ../core/ -y ../../rtl/top/ -y ../../rtl/xb/xlr8_float -y ../../rtl/xb/xlr8_servo -y ../../rtl/xb/xlr8_quadrature -y ../../rtl/xb/xlr8_neopixel -y ../../ip/int_osc/int_osc/synthesis")
 // eval:(verilog-read-defines)
 // End:
+
+
