@@ -13,6 +13,7 @@
 //    [  7:  0]  [  7:  0]  PORTD[7:0]       
 //    [ 13:  8]  [ 13:  8]  PORTB[5:0]    
 //    [ 19: 14]  [ 19: 14]  PORTC[5:0]     
+//    --- D Pins 21 and 20 missing ---
 //    [ 27: 22]  [ 25: 20]  PORTA[5:0]
 //    [ 33: 28]  [ 31: 26]  PORTE[5:0]
 //    [ 41: 34]  [ 39: 32]  PORTG[7:0]
@@ -32,7 +33,7 @@
   
 module xlr8_snoedge_gpio
   #(
-    parameter NUM_PINS       = 118,
+    parameter NUM_PINS       = 108,
     parameter NUM_SNO_PINS   = 42,    // 20 for D, B, and C, plus 20 for A, E, G
     parameter PINPL_Address  = 8'h8C, // Input Pins         Port PL
     parameter DDRPL_Address  = 8'h8D, // Data Direction Reg Port PL
@@ -101,25 +102,24 @@ module xlr8_snoedge_gpio
     );
    
    // Bit ranges within the big bus for the various ports. See chart in header
-   localparam PORTJ0_HI =   49; // Port J0[7:0]
-   localparam PORTJ0_LO =   42;
-   localparam PORTJ1_HI =   57; // Port J1[7:0]
-   localparam PORTJ1_LO =   50;
-   localparam PORTJ2_HI =   65; // Port J2[7:0]
-   localparam PORTJ2_LO =   58;
-   localparam PORTJ3_HI =   73; // Port J3[3:0]
-   localparam PORTJ3_LO =   66;
-   localparam PORTK0_HI =   81; // Port K0[7:0]
-   localparam PORTK0_LO =   74;
-   localparam PORTK1_HI =   89; // Port K1[7:0]
-   localparam PORTK1_LO =   82;
-   localparam PORTK2_HI =   97; // Port K2[7:0]
-   localparam PORTK2_LO =   90;
-   localparam PORTK3_HI =  105; // Port K3[7:0]
-   localparam PORTK3_LO =   98;
-   localparam PORTPL_HI =  109; // Port PL[5:0]
-   localparam PORTPL_LO =  106;
-
+   localparam PORTJ0_LO =   40; // Port J0[7:0]
+   localparam PORTJ0_HI =   47;
+   localparam PORTJ1_LO =   48; // Port J1[7:0]
+   localparam PORTJ1_HI =   55;
+   localparam PORTJ2_LO =   56; // Port J2[7:0]
+   localparam PORTJ2_HI =   63;
+   localparam PORTJ3_LO =   64; // Port J3[3:0]
+   localparam PORTJ3_HI =   71;
+   localparam PORTK0_LO =   72; // Port K0[7:0]
+   localparam PORTK0_HI =   79;
+   localparam PORTK1_LO =   80; // Port K1[7:0]
+   localparam PORTK1_HI =   87;
+   localparam PORTK2_LO =   88; // Port K2[7:0]
+   localparam PORTK2_HI =   95;
+   localparam PORTK3_LO =   96; // Port K3[7:0]
+   localparam PORTK3_HI =  103;
+   localparam PORTPL_LO =  104; // Port PL[5:0]
+   localparam PORTPL_HI =  107;
    // These connect between the port and the portmux
    logic [NUM_PINS-1:NUM_SNO_PINS]         port_portx;
    logic [NUM_PINS-1:NUM_SNO_PINS]         port_ddrx;

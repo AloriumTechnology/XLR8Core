@@ -132,8 +132,8 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to    D13
 set_location_assignment PIN_B4                          -to    D8
 set_location_assignment PIN_B2                          -to    D9
 set_location_assignment PIN_A4                          -to    D10
-set_location_assignment PIN_A8                          -to    D11
-set_location_assignment PIN_A7                          -to    D12
+set_location_assignment PIN_A7                          -to    D11
+set_location_assignment PIN_A8                          -to    D12
 set_location_assignment PIN_A2                          -to    D13
 
 #============================================================================

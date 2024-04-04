@@ -217,11 +217,11 @@ module xlr8_alorium_top
    localparam NUM_PINS   = 122; // A[5:0],D[13:0] and Hinj Specific GPIO
 `elsif SNOEDGE_BOARD
    localparam BOARD_TYPE = SNOEDGE_BOARD_CODE; 
-   localparam NUM_PINS   = 110; // A[5:0],D[13:0] and D[127:22]
+   localparam NUM_PINS   = 108; // A[5:0],D[13:0] and D[109:22]
    localparam NUM_SNO_XPORTS = 6; // Number of "extra" ports (A,E,G,J,K,PL)
 `elsif SNOEDGE50_BOARD
    localparam BOARD_TYPE = SNOEDGE50_BOARD_CODE; 
-   localparam NUM_PINS   = 110; // A[5:0],D[13:0] and D[127:22]
+   localparam NUM_PINS   = 108; // A[5:0],D[13:0] and D[109:22]
    localparam NUM_SNO_XPORTS = 6; // Number of "extra" ports (A,E,G,J,K,PL)
 `elsif SNOM2_BOARD
    localparam BOARD_TYPE = SNOM2_BOARD_CODE; 
@@ -241,6 +241,13 @@ module xlr8_alorium_top
    localparam BOARD_TYPE = XLR8_BOARD_CODE; 
    localparam NUM_PINS   = 20; // A[5:0] and D[13:0]
 `endif
+
+   localparam QUAD_OFFSET  = (BOARD_TYPE ==   SNOEDGE_BOARD_CODE) ? 40 : // Port J
+                             (BOARD_TYPE == SNOEDGE50_BOARD_CODE) ? 40 : // Port J
+                                                                     0;  // Default = pin 0
+   localparam SERVO_OFFSET = (BOARD_TYPE ==   SNOEDGE_BOARD_CODE) ? 72 : // Port K
+                             (BOARD_TYPE == SNOEDGE50_BOARD_CODE) ? 72 : // Port K
+                                                                     0;  // Default = pin 0
    
    // Create a fully loaded version of DESIGN_CONFIG by adding the BOARD_TYPE field 
    // to the MSB of DESIGN_CONFIG
@@ -280,7 +287,7 @@ module xlr8_alorium_top
                               (DESIGN_CONFIG_FPGA_SIZE == 8'h08) ? 13 : 13; // M08
    localparam UFM_BC_WIDTH = 4;
    localparam NUM_UNO_PINS   = 20; // A[5:0] and D[13:0]
-   localparam NUM_SNO_PINS   = 42; // D, B, and C, plus A, E, and G
+   localparam NUM_SNO_PINS   = 40; // D, B, and C, plus A, E, and G
    localparam NUM_XBS    = 4; // Number of XB inputs to xb_pinmux
    localparam CLOCK_SELECT = DESIGN_CONFIG[2:1]; // 2 bits. 0=16MHZ, 1=32MHz, 2=64MHz, 3=reserved
    localparam PLL_SELECT   = DESIGN_CONFIG[4];  // 1=50MHz PLL, 0=16MHz PLL
@@ -608,8 +615,8 @@ module xlr8_alorium_top
    //   Servo
    assign xbs_ddoe[1] = {NUM_PINS{1'b0}}; // Library still sets the data direction
    assign xbs_ddov[1] = {NUM_PINS{1'b0}};
-   assign xbs_pvoe[1] = {{(NUM_PINS-NUM_SERVOS){1'b0}},servos_en[NUM_SERVOS-1:0]};
-   assign xbs_pvov[1] = {{(NUM_PINS-NUM_SERVOS){1'b0}},servos_out[NUM_SERVOS-1:0]};
+   assign xbs_pvoe[1] = {{(NUM_PINS-NUM_SERVOS-SERVO_OFFSET){1'b0}},servos_en[NUM_SERVOS-1:0], {SERVO_OFFSET{1'b0}}};
+   assign xbs_pvov[1] = {{(NUM_PINS-NUM_SERVOS-SERVO_OFFSET){1'b0}},servos_out[NUM_SERVOS-1:0],{SERVO_OFFSET{1'b0}}};
    //   NeoPixel
    assign xbs_ddoe[2] = {NUM_PINS{1'b0}}; // Library still sets the data direction
    assign xbs_ddov[2] = {NUM_PINS{1'b0}};
@@ -1472,7 +1479,7 @@ module xlr8_alorium_top
       .ramre       (core_ramre),
       .ramwe       (core_ramwe),
       .dm_sel      (core_dm_sel),
-      .xb_ddoe     (xb_ddoe[NUM_PINS-1:NUM_SNO_PINS]),
+      .xb_ddoe     (xb_ddoe[NUM_PINS-1:NUM_SNO_PINS]), // 107:40
       .xb_ddov     (xb_ddov[NUM_PINS-1:NUM_SNO_PINS]),
       .xb_pvoe     (xb_pvoe[NUM_PINS-1:NUM_SNO_PINS]),
       .xb_pvov     (xb_pvov[NUM_PINS-1:NUM_SNO_PINS]),
@@ -1481,8 +1488,8 @@ module xlr8_alorium_top
                      K[31:0],
                      J[31:0]
                      }),
-      .xb_pinx     (xb_pinx[NUM_PINS-1:NUM_SNO_PINS]),
-      .pcint       ({portpl_pcint,portk_pcint,portj_pcint}) // Sno Edge GPIO Pin Change Interrupts to snoedge_pcint
+      .xb_pinx     (xb_pinx[NUM_PINS-1:NUM_SNO_PINS]), // 107:40
+      .pcint       ({portpl_pcint,portk_pcint,portj_pcint}) // Pin Change Interrupts
       );
    
 `endif // ANY_SNOEDGE_BOARD   
@@ -1827,8 +1834,8 @@ module xlr8_alorium_top
       if (USE_QUADRATURE_UNIT) begin: u_xb_quadrature
          for (iii=0; iii < NUM_QUADRATURES; iii = iii + 1)
            begin : u_xb_quadrature_for
-              assign quadratures_in_a[iii]   = xb_pinx[(iii+1)*2];
-              assign quadratures_in_b[iii]   = xb_pinx[(iii+1)*2+1];
+              assign quadratures_in_a[iii]   = xb_pinx[((iii+1)*2)+QUAD_OFFSET];
+              assign quadratures_in_b[iii]   = xb_pinx[((iii+1)*2)+QUAD_OFFSET+1];
            end
 
          //----------------------------------------------------------------------
